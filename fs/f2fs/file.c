@@ -421,10 +421,10 @@ out:
 
 	trace_f2fs_sync_file_exit(inode, cp_reason, datasync, ret);
 
-	f2fs_trace_ios(NULL, 1);
+#if 0
 	stat_inc_sync_file_count(sbi);
 	trace_android_fs_fsync_end(inode, start, end - start);
-
+#endif
 	return ret;
 }
 

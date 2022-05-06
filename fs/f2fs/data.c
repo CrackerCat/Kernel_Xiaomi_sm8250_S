@@ -286,15 +286,6 @@ static void f2fs_read_end_io(struct bio *bio)
 		return;
 	}
 
-	if (first_page != NULL &&
-		__read_io_type(first_page) == F2FS_RD_DATA) {
-		trace_android_fs_dataread_end(first_page->mapping->host,
-						page_offset(first_page),
-						bio->bi_iter.bi_size);
-	}
-
-	__f2fs_read_end_io(bio, false, false);
-
 	if (ctx && (ctx->enabled_steps & (STEP_DECRYPT | STEP_DECOMPRESS))) {
 		INIT_WORK(&ctx->work, f2fs_post_read_work);
 		queue_work(ctx->sbi->post_read_wq, &ctx->work);
@@ -1049,12 +1040,6 @@ static struct bio *f2fs_grab_read_bio(struct inode *inode, block_t blkaddr,
 
 	if (fscrypt_inode_uses_fs_layer_crypto(inode))
 		post_read_steps |= 1 << STEP_DECRYPT;
-	if (f2fs_compressed_file(inode))
-		post_read_steps |= 1 << STEP_DECOMPRESS_NOWQ;
-	if (f2fs_need_verity(inode, first_idx))
-		post_read_steps |= 1 << STEP_VERITY;
-	if (f2fs_encrypted_file(inode))
-		post_read_steps |= STEP_DECRYPT;
 
 	if (f2fs_need_verity(inode, first_idx))
 		post_read_steps |= STEP_VERITY;
