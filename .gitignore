@@ -144,3 +144,8 @@ kernel/configs/android-*.cfg
 scripts/build_dtbo
 scripts/build_kernel
 scripts/update_defconfig
+support_devices
+device_list
+build.log
+anykernel/
+out/
