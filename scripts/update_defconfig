@@ -9,13 +9,14 @@
 # Currently set tip to the current kernel directory
 KERNEL_TOP=$(pwd)
 KERNEL_CFG=arch/arm64/configs/vendor/xiaomi
+
 OUT_DIR=$KERNEL_TOP/temp
 export KERNEL_TOP
 export KERNEL_CFG
 export OUT_DIR
 
 # Set compiler PATH
-PATH=${HOME}/proton-clang/bin:$PATH
+PATH=/usr/bin:$PATH
 
 BUILD="make O=$OUT_DIR \
 ARCH=arm64 \
@@ -52,6 +53,9 @@ if [ -n  "$*" ]; then
       DEVICE=$1;
     ;;
     cmi)
+      DEVICE=$1;
+    ;;
+    ucmi)
       DEVICE=$1;
     ;;
     elish)
@@ -105,11 +109,11 @@ if [ -n  "$*" ]; then
   case "$ret" in
     *"error"*|*"ERROR"*) echo "ERROR: $ret"; exit 1;;
   esac
-  mv "$OUT_DIR"/defconfig ./arch/arm64/configs/"$1"_defconfig
+  mv "$OUT_DIR"/defconfig ./arch/arm64/configs/vendor/output/"$1"_defconfig
 
 else
 
-  DEVICES="alioth apollo cas cmi elish enuma lmi umi thyme psyche"
+  DEVICES="alioth apollo cas cmi elish enuma lmi umi ucmi thyme psyche"
 
   for device in $DEVICES; do \
 
@@ -124,6 +128,9 @@ else
         DEVICE=$device;
       ;;
       cmi)
+        DEVICE=$device;
+      ;;
+      ucmi)
         DEVICE=$device;
       ;;
       elish)
@@ -177,7 +184,7 @@ else
       case "$ret" in
         *"error"*|*"ERROR"*) echo "ERROR: $ret"; exit 1;;
       esac
-      mv "$OUT_DIR"/defconfig ./arch/arm64/configs/"$device"_defconfig
+      mv "$OUT_DIR"/defconfig ./arch/arm64/configs/vendor/output/"$device"_defconfig
   done
 fi
 
