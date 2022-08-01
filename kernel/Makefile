@@ -128,7 +128,24 @@ obj-$(CONFIG_RSEQ) += rseq.o
 $(obj)/configs.o: $(obj)/config_data.h
 
 targets += config_data.gz
-$(obj)/config_data.gz: $(KCONFIG_CONFIG) FORCE
+ifeq ($(CONFIG_BOARD_ALIOTH),y)
+$(obj)/config_data.gz: arch/arm64/configs/alioth-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_THYME),y)
+$(obj)/config_data.gz: arch/arm64/configs/thyme-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_UMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_CMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_UCMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_PSYCHE),y)
+$(obj)/config_data.gz: arch/arm64/configs/psyche-stock_defconfig FORCE
+endif
 	$(call if_changed,gzip)
 
       filechk_ikconfiggz = (echo "static const char kernel_config_data[] __used = MAGIC_START"; cat $< | scripts/bin2c; echo "MAGIC_END;")
