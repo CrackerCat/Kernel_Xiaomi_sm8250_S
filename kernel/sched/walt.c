@@ -2928,6 +2928,32 @@ add_task_to_group(struct task_struct *p, struct related_thread_group *grp)
 	return 0;
 }
 
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+static inline bool uclamp_task_colocated(struct task_struct *p)
+{
+	struct cgroup_subsys_state *css;
+	struct task_group *tg;
+	bool colocate;
+
+	rcu_read_lock();
+	css = task_css(p, cpu_cgrp_id);
+	if (!css) {
+		rcu_read_unlock();
+		return false;
+	}
+	tg = container_of(css, struct task_group, css);
+	colocate = tg->colocate;
+	rcu_read_unlock();
+
+	return colocate;
+}
+#else
+static inline bool uclamp_task_colocated(struct task_struct *p)
+{
+	return false;
+}
+#endif /* CONFIG_UCLAMP_TASK_GROUP */
+
 void add_new_task_to_grp(struct task_struct *new)
 {
 	unsigned long flags;
@@ -3021,7 +3047,7 @@ unsigned int sched_get_group_id(struct task_struct *p)
 	return group_id;
 }
 
-#if defined(CONFIG_SCHED_TUNE)
+#if defined(CONFIG_SCHED_TUNE) || defined(CONFIG_UCLAMP_TASK_GROUP)
 /*
  * We create a default colocation group at boot. There is no need to
  * synchronize tasks between cgroups at creation time because the
