@@ -241,7 +241,7 @@ config UFSTW_IGNORE_GUARANTEE_BIT
 
 config UFSTW_ENABLE_BY_DEFAULT
 	bool "UFSTW_ENABLE_BY_DEFAULT"
-	default n
+	default y
 	depends on SCSI_UFSHCD && UFSFEATURE && UFSTW
 	---help---
 	Activate UFS Turbo Write right after powering up
