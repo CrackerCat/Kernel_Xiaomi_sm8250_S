@@ -32,7 +32,6 @@ obj-$(CONFIG_QCOM_SECURE_BUFFER) += secure_buffer.o
 obj-$(CONFIG_MSM_TZ_SMMU) += msm_tz_smmu.o
 CFLAGS_scm.o :=$(call as-instr,.arch_extension sec,-DREQUIRES_SEC=1)
 obj-$(CONFIG_QCOM_SCM)  +=      scm.o
-obj-$(CONFIG_QCOM_EARLY_RANDOM) += early_random.o
 obj-$(CONFIG_MSM_SPSS_UTILS) += spss_utils.o
 obj-$(CONFIG_QTEE_SHM_BRIDGE) += qtee_shmbridge.o
 obj-$(CONFIG_MSM_BOOT_STATS) += boot_stats.o
