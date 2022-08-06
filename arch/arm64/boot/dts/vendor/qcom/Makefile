@@ -411,6 +411,7 @@ sdm660-internal-codec-cdp.dtb \
         sdm660-usbc-audio-mtp.dtb \
         sdm660-usbc-audio-rcm.dtb
 endif
+endif
 
 always		:= $(dtb-y)
 subdir-y	:= $(dts-dirs)
