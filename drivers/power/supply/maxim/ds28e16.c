@@ -45,6 +45,7 @@ struct ds28e16_data {
 	int version;
 	int cycle_count;
 	bool batt_verified;
+	bool factory_enable;
 	struct delayed_work	battery_verify_work;
 	struct power_supply *verify_psy;
 	struct power_supply_desc verify_psy_d;
@@ -1059,7 +1060,6 @@ static int verify_get_property(struct power_supply *psy, enum power_supply_prope
 		} else {
 			val->intval = false;
 		}
-#else
 		if ((mi_romid[0] == 0x9f) && (mi_romid[6] == 0x04) && ((mi_romid[5] & 0xf0) == 0xf0))
 			val->intval = true;
 		else
