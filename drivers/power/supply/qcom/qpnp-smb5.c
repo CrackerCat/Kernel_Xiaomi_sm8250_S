@@ -1158,6 +1158,9 @@ static int smb5_parse_dt_misc(struct smb5 *chip, struct device_node *node)
 		}
 	}
 
+	chg->support_ext_5v_boost = of_property_read_bool(node,
+				"qcom,support-ext-5v-boost");
+
 	of_property_read_u32(node, "qcom,fcc-step-delay-ms",
 					&chg->chg_param.fcc_step_delay_ms);
 	if (chg->chg_param.fcc_step_delay_ms <= 0)
@@ -1527,7 +1530,6 @@ static int smb5_usb_get_prop(struct power_supply *psy,
 		val->intval = get_client_vote(chg->usb_icl_votable, PD_VOTER);
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
-		if (smblib_get_fastcharge_mode(chg))
 #if IS_ENABLED(CONFIG_BOARD_CAS)
 			val->intval = 12000000;
 #elif IS_ENABLED(CONFIG_BOARD_CMI)
@@ -1535,7 +1537,6 @@ static int smb5_usb_get_prop(struct power_supply *psy,
 #else
 			val->intval = 6000000;
 #endif
-		else
 			rc = smblib_get_prop_input_current_max(chg, val);
 		break;
 	case POWER_SUPPLY_PROP_TYPE:
