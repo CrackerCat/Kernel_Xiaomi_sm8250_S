@@ -123,11 +123,10 @@ function start_build() {
 		clean_up_outfolder
 	fi
 
-	# MIUI Build
-	echo "------ Starting MIUI Build, Device ${DEVICE} ------"
-	os=miui
+	# Start Build
+	echo "------ Starting ${OS} Build, Device ${DEVICE} ------"
 
-	source build_config/build.args
+	source build_config/build.args.${OS}
 	export ARCH
 	export LLVM
 	export CLANG_TRIPLE
@@ -161,7 +160,7 @@ function start_build() {
 		make -j${KEBABS} O=${OUT_DIR} 2>&1 | tee build.log
 	fi
 
-	ZIPNAME="Voyager-${DEVICE^^}-build${BUILD}-MIUI-${CSUM}-${DATE}.zip"
+	ZIPNAME="Voyager-${DEVICE^^}-build${BUILD}-${OS}-${CSUM}-${DATE}.zip"
 	export ZIPNAME	
 
 	echo "------ Filename: ${ZIPNAME} ------"
@@ -175,7 +174,7 @@ function start_build() {
 	mv ${ZIPNAME} out/
 	cd ../
 
-	echo "------ Finishing MIUI Build, Device ${DEVICE} ------"
+	echo "------ Finishing ${OS} Build, Device ${DEVICE} ------"
 }
 
 # Complie with a list of specialized devices
@@ -201,8 +200,10 @@ fi
 #
 START=$(date +"%s")
 
-if [[ "$2" =~ "MIUI"* ]] && [[ ! "$1" =~ "list"* ]]; then
+if [[ ! "$2" =~ ""* ]] && [[ ! "$1" =~ "list"* ]]; then
 	DEVICE=$1
+	OS=$2
+	export OS
 	export DEVICE
 	export MULTI_BUILD=0
 	start_build
