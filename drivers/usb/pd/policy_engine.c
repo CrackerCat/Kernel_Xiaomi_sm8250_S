@@ -503,6 +503,7 @@ struct usbpd {
 	int                     last_uv;
 	int                     last_ua;
 	int			apdo_max;
+	int			power_max;
 	u64			monitor_entry_time;
 
 	/* non-qcom pps control */
@@ -5827,6 +5828,10 @@ struct usbpd *usbpd_create(struct device *parent)
 
 	pd->non_qcom_pps_ctr = of_property_read_bool(parent->of_node,
 				"mi,non-qcom-pps-ctrl");
+
+	of_property_read_u32(parent->of_node, "mi,pd-power-max", &pd->power_max);
+	usbpd_info(&pd->dev, "pd-power-max:%d\n", pd->power_max);
+
 	if (pd->num_sink_caps > 0) {
 		int i;
 		u32 sink_caps[14];
