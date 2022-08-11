@@ -511,6 +511,9 @@ And public attribution of xiaomi platforms(like alioth and so and)
 	status = "ok";
 	aw8697_haptic@5A {
 		compatible = "awinic,aw8697_haptic";
+		vib_bst_vol_default = < 0x11 >;
+		vib_bst_vol_ram = < 0x11 >;
+		vib_bst_vol_rtp = < 0x11 >;
 		status = "ok";
 	};
 };
@@ -674,6 +677,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 		//mi,cp-sec-enable;
 		mi,therm-level-threshold = <12>;
 		mi,chg-enable-k11a;
+		mi,pd-power-max = <33>; /*charge power max : 33W */
 	};
 
 	umi_batterydata: qcom,battery-data {
@@ -716,6 +720,7 @@ And public attribution of xiaomi platforms(like alioth and so and)
 
 &pm8150b_pdphy {
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <33>; /*charge power max : 33W */
 };
 
 &smb1390 {

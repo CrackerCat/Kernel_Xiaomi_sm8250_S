@@ -104,10 +104,11 @@ And public attribution of xiaomi platforms(like enuma and so and)
 
 &usb1 {
 	status = "ok";
-};
+	qcom,ignore-wakeup-src-in-hostmode;
 
-&dwc1 {
-	dr_mode = "host";
+	dwc3@a800000 {
+		dr_mode = "host";
+	};
 };
 
 &usb2_phy1 {
@@ -1008,6 +1009,7 @@ And public attribution of xiaomi platforms(like enuma and so and)
 		//mi,cell-vol-high-threshold-mv = <4448>;
 		//mi,cell-vol-max-threshold-mv = <4477>;
 		mi,chg-enable-k81;
+		mi,pd-power-max = <67>; /*charge power max : 67W */
 	};
 
 	dual-FuelGauge{
@@ -1041,6 +1043,7 @@ And public attribution of xiaomi platforms(like enuma and so and)
 
 &pm8150b_pdphy {
 	mi,non-qcom-pps-ctrl;
+	mi,pd-power-max = <67>; /*charge power max : 67W */
 };
 
 &smb1390 {
