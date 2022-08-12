@@ -500,6 +500,12 @@ config BOARD_UMI
 	help
 	  This enables support for Xiaomi MI 10.
 
+config BOARD_UCMI
+	bool "UCmi platform"
+	select BOARD_XIAOMI_SM8250
+	help
+	  This enables support for Xiaomi MI 10.
+
 config BOARD_XIAOMI_SM7250
 	bool "Xiaomi SM7250 Board"
 	select ARCH_QCOM
