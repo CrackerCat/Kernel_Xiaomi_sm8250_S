@@ -67,6 +67,9 @@ if [ -n  "$*" ]; then
     lmi)
       DEVICE=$1;
     ;;
+    munch)
+      DEVICE=$1;
+    ;;
     umi)
       DEVICE=$1;
     ;;
@@ -113,7 +116,14 @@ if [ -n  "$*" ]; then
 
 else
 
-  DEVICES="alioth apollo cas cmi elish enuma lmi umi ucmi thyme psyche"
+read -r -d '' KERNEL_COMMIT_MESSAGE << EOM
+ARM64: configs: xiaomi: update auto-generated defconfig for all devices
+This update is generated automatically by using the update_defconfig script
+HEAD of the project used to prepare this commit:
+${KERNEL_DEFCONFIG_URL}/tree/${KERNEL_DEFCONFIG_HEAD}
+EOM
+
+  DEVICES="alioth apollo cas cmi elish enuma lmi munch umi ucmi thyme psyche"
 
   for device in $DEVICES; do \
 
@@ -140,6 +150,9 @@ else
         DEVICE=$device;
       ;;
       lmi)
+        DEVICE=$device;
+      ;;
+      munch)
         DEVICE=$device;
       ;;
       umi)
