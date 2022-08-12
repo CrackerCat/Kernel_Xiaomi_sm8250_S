@@ -126,6 +126,7 @@ function start_build() {
 	# Start Build
 	echo "------ Starting ${OS} Build, Device ${DEVICE} ------"
 
+	os=${OS,,}
 	source build_config/build.args.${OS}
 	export ARCH
 	export LLVM
