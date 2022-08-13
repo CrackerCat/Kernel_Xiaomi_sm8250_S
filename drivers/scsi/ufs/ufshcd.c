@@ -9153,7 +9153,6 @@ static int ufshcd_quirk_tune_host_pa_tactivate(struct ufs_hba *hba)
 					  new_peer_pa_tactivate);
 	}
 
-	pr_err(%s: [utsav]pa_hibern8time_quirk_enabled: %d\n, (int)pa_hibern8time_quirk_enabled);
 	if (pa_hibern8time_quirk_enabled) {
 		ret = ufshcd_dme_peer_set(hba, UIC_ARG_MIB(PA_TXHSG4SYNCLENGTH), 0x4F);
 		ret = ufshcd_dme_peer_set(hba, UIC_ARG_MIB(PA_TXHSG1SYNCLENGTH), 0x4F);
