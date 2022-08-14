@@ -137,6 +137,18 @@ endif
 ifeq ($(CONFIG_BOARD_UMI),y)
 $(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
 endif
+ifeq ($(CONFIG_BOARD_LMI),y)
+$(obj)/config_data.gz: arch/arm64/configs/lmi-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_APOLLO),y)
+$(obj)/config_data.gz: arch/arm64/configs/apollo-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_CAS),y)
+$(obj)/config_data.gz: arch/arm64/configs/cas-stock_defconfig FORCE
+endif
+ifeq ($(CONFIG_BOARD_MUNCH),y)
+$(obj)/config_data.gz: arch/arm64/configs/munch-stock_defconfig FORCE
+endif
 ifeq ($(CONFIG_BOARD_CMI),y)
 $(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
 endif
