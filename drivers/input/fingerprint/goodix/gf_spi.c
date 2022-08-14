@@ -58,7 +58,6 @@
 #elif defined(USE_PLATFORM_BUS)
 #include <linux/platform_device.h>
 #endif
-#include <soc/qcom/socinfo.h>
 
 #define VER_MAJOR   1
 #define VER_MINOR   2
@@ -1026,13 +1025,6 @@ static struct platform_driver gf_driver = {
 static int __init gf_init(void)
 {
 	int status;
-
-	if (HARDWARE_PLATFORM_MUNCH == get_hw_version_platform() &&
-		(uint32_t)CountryCN == get_hw_country_version()) {
-		pr_warn("%s: MUNCH china detected do not init!\n", __func__);
-		return 0;
-	}
-
 	/* Claim our 256 reserved device numbers.  Then register a class
 	 * that will key udev/mdev to add/remove /dev nodes.  Last, register
 	 * the driver which manages those device numbers.
