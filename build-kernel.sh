@@ -85,6 +85,7 @@ function out_product() {
 		fi
 	fi
 	cp ${OUT_DIR}/arch/arm64/boot/dtb anykernel/kernels/$os
+	cp ${OUT_DIR}/arch/arm64/boot/dtbo.img anykernel/kernels/$os
 
 	# If we use a patch script..
 	if [[ $PATCH_OUT_PRODUCT_HOOK == 1 ]]; then
@@ -109,11 +110,8 @@ function clean_up_outfolder() {
 
 function ak3_compress()
 {
-	if [ ! -d "anykernel" ]; then
-		git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel && cd anykernel
-	else
-		cd anykernel || exit
-	fi
+	cd anykernel || exit
+
 	zip -r9 "${ZIPNAME}" ./* -x .git .gitignore out/ ./*.zip
 	if [[ ! MULTI_BUILD ]]; then
 		mkdir out
@@ -195,6 +193,10 @@ function build_by_list() {
 #
 # Do complie 
 #
+if [ ! -d "anykernel" ]; then
+	git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel && cd anykernel
+fi
+
 START=$(date +"%s")
 
 if [[ ! "$2" =~ ""* ]] && [[ ! "$1" =~ "list"* ]] && [[ ! "$1" =~ "clean" ]] && [[ ! "$1" =~ "-h" ]]; then
