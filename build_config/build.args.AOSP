@@ -36,4 +36,4 @@ function overwrite_config() {
 }
 
 # Use it to change the path or name of your extra script
-PACTH_NAME=patch.sh
+PACTH_NAME=

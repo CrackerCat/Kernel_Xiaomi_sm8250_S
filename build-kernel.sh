@@ -85,7 +85,11 @@ function out_product() {
 		fi
 	fi
 	cp ${OUT_DIR}/arch/arm64/boot/dtb anykernel/kernels/$os
-	cp ${OUT_DIR}/arch/arm64/boot/dtbo.img anykernel/kernels/$os
+
+	# If we use a patch script..
+	if [[ $PATCH_OUT_PRODUCT_HOOK == 1 ]]; then
+		patch_out_product_hook
+	fi
 }
 
 function clean_up_outfolder() {
@@ -103,7 +107,7 @@ function clean_up_outfolder() {
 	echo "-------------------- Done! ------------------"
 }
 
-function post_complie_compress()
+function ak3_compress()
 {
 	if [ ! -d "anykernel" ]; then
 		git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel && cd anykernel
@@ -126,8 +130,14 @@ function start_build() {
 	# Start Build
 	echo "------ Starting ${OS} Build, Device ${DEVICE} ------"
 
+	#
+	# Set some variables for further use
+	#
+	# Let ak3 compress sequence know which system type we use
 	os=${OS,,}
+
 	source build_config/build.args.${OS}
+	source build_config/${PACTH_NAME}
 	export ARCH
 	export LLVM
 	export CLANG_TRIPLE
@@ -136,7 +146,7 @@ function start_build() {
 	export CC
 	export HOSTCC
 	export HOSTCXX
-	
+
 	# Make defconfig
 	make -j${KEBABS} O=${OUT_DIR} vendor/output/"${DEVICE}"_defconfig
 
@@ -146,12 +156,6 @@ function start_build() {
 	cd ${OUT_DIR} || exit
 	make -j${KEBABS} O=${OUT_DIR} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="cache g++" olddefconfig
 	cd ../ || exit
-
-	if [[ MORE_SCRIPTS -eq 1 ]]; then	
-		EXTRA_SCRIPT=$CONFIG/$PACTH_NAME
-		echo "----- Including $EXTRA_SCRIPT -----"
-		source $EXTRA_SCRIPT
-	fi
 
 	if [[ "$@" =~ "lto"* ]]; then
 		# Enable LTO
@@ -170,10 +174,7 @@ function start_build() {
 
 	out_product
 
-	cd anykernel || exit
-	zip -r9 "${ZIPNAME}" ./* -x .git .gitignore out/ ./*.zip
-	mv ${ZIPNAME} out/
-	cd ../
+	ak3_compress
 
 	echo "------ Finishing ${OS} Build, Device ${DEVICE} ------"
 }
@@ -183,34 +184,29 @@ function build_by_list() {
 	clean_up_outfolder
 	while read rows
 	do 
-   		 DEVICE=$rows
-   		 echo $DEVICE
+   		 DEVICE=$(echo $rows | awk '{print $1}')
+   		 OS=$(echo $rows | awk '{print $2}')
    		 start_build
-	done < device_list
+	done < ${LIST}
 
 	git checkout arch/arm64/boot/dts/vendor &>/dev/null
 }
-
-# If you need to invoke other script
-if [[ "$*" =~ "-A" ]]; then
-	export MORE_SCRIPTS=1
-fi
 
 #
 # Do complie 
 #
 START=$(date +"%s")
 
-if [[ ! "$2" =~ ""* ]] && [[ ! "$1" =~ "list"* ]]; then
+if [[ ! "$2" =~ ""* ]] && [[ ! "$1" =~ "list"* ]] && [[ ! "$1" =~ "clean" ]] && [[ ! "$1" =~ "-h" ]]; then
 	DEVICE=$1
 	OS=$2
-	export OS
-	export DEVICE
 	export MULTI_BUILD=0
 	start_build
 fi
 
-if [[ "$1" =~ "list"* ]]; then
+if [[ -a "$1" ]]; then
+	export LIST=$1
+	echo "---- Detect build list for bulk complie! ----"
 	export MULTI_BUILD=1
 	build_by_list
 fi
@@ -233,14 +229,6 @@ if [[ "$1" =~ "clean" ]]; then
 	clean_up_outfolder
 fi
 
-# If you need to generate a device list for kernel building
-if [[ "$1" =~ "-g" ]]; then
-	echo "------ Generating device list ------"
-	echo "$*" | awk -F "-g " '{print $2}' | xargs -n1 > device_list
-	echo "------ Save to current folder ------"
-	echo "-------------- Done! ---------------"
-fi
-
 #
 # Functions for help
 #
@@ -260,11 +248,10 @@ SELF_INTRO1="   This is a commonized script for kernel building. \
 		after making old defconfig to do some special changes. \
 		For more information, see the script usage."
 
-SELF_INTRO2=$(echo "Usage1: bash build-kernel.sh [device_code] [system_type] [-A]")
-SELF_INTRO3=$(echo "Usage2: bash build-kernel.sh list [-A]")
+SELF_INTRO2=$(echo "Usage1: bash build-kernel.sh [device_code] [system_type]")
+SELF_INTRO3=$(echo "Usage2: bash build-kernel.sh list")
 SELF_INTRO4=$(echo "Usage3: bash build-kernel.sh -g [device_codes (separated with space)]")
 SELF_INTRO5=$(echo "Usage4: bash build-kernel.sh clean")
-SELF_INTRO6=$(echo "-A:                          Include extra script")
 SELF_INTRO7=$(echo "-g [device_codes]:           generate a list of device_code for continuous complie")
 SELF_INTRO7=$(echo "-clean:                      clean up work folders include dts, complie output and kernelzip")
 
@@ -276,6 +263,5 @@ if [[ "$1" =~ "-h" ]]; then
 		echo $SELF_INTRO4;
 		echo "          ";
 		echo $SELF_INTRO5;
-		echo $SELF_INTRO6;
 		echo $SELF_INTRO7;
 fi
