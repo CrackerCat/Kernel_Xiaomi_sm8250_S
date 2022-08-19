@@ -1101,7 +1101,7 @@ static void free_pages_life(struct zram_pages_life *pl)
 	}
 }
 
-static struct zram_pages_life *init_pages_life()
+static struct zram_pages_life *init_pages_life(void)
 {
 	size_t i = 0;
 	struct zram_pages_life *pl = NULL;
