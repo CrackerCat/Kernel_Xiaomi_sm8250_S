@@ -13,9 +13,6 @@ gre='\e[0;32m'
 export KBUILD_BUILD_HOST="Voayger-sever"
 export KBUILD_BUILD_USER="TheVoyager"
 
-# Set compiler path
-PATH=/usr/bin/:${PATH}
-
 # Set the current branch name
 BRANCH=$(git rev-parse --symbolic-full-name --abbrev-ref HEAD)
 
@@ -49,9 +46,23 @@ if [[ -z "${KEBABS}" ]]; then
 	export KEBABS="$((COUNT * 2))"
 fi
 
-function enable_lto() {
+function enable_flto() {
 	scripts/config --file ${OUT_DIR}/.config \
-	-e LTO_CLANG
+		-e	LTO				\
+		-e	LTO_CLANG		\
+		-d	THIN_LTO
+
+    	# Make olddefconfig
+	cd ${OUT_DIR} || exit
+	make -j${KEBABS} ${ARGS} olddefconfig
+	cd ../ || exit
+}
+
+function enable_tlto() {
+	scripts/config --file ${OUT_DIR}/.config \
+		-e	LTO				\
+		-e	LTO_CLANG		\
+		-e	THIN_LTO
 
     	# Make olddefconfig
 	cd ${OUT_DIR} || exit
@@ -103,7 +114,7 @@ function clean_up_outfolder() {
 	echo "------- Cleanup up previous kernelzip -------"
 	if [[ -d anykernel/out/ ]]; then
 			rm -r anykernel/out/
-			mkdir anykernel/out/
+			mkdir anykernel/out
 	fi
 	echo "-------------------- Done! ------------------"
 }
@@ -111,6 +122,10 @@ function clean_up_outfolder() {
 function ak3_compress()
 {
 	cd anykernel || exit
+
+	if [[ ! -d anykernel/out/ ]]; then
+			mkdir out
+	fi
 
 	zip -r9 "${ZIPNAME}" ./* -x .git .gitignore out/ ./*.zip
 	if [[ ! MULTI_BUILD ]]; then
@@ -136,31 +151,29 @@ function start_build() {
 
 	source build_config/build.args.${OS}
 	source build_config/${PACTH_NAME}
-	export ARCH
-	export LLVM
-	export CLANG_TRIPLE
-	export CROSS_COMPILE
-	export CROSS_COMPILE_COMPAT
-	export CC
-	export HOSTCC
-	export HOSTCXX
 
 	# Make defconfig
-	make -j${KEBABS} O=${OUT_DIR} vendor/output/"${DEVICE}"_defconfig
+	make -j${KEBABS} ${ARGS} vendor/output/"${DEVICE}"_defconfig
 
 	overwrite_config
 
 	# Make olddefconfig
 	cd ${OUT_DIR} || exit
-	make -j${KEBABS} O=${OUT_DIR} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="cache g++" olddefconfig
+	make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" olddefconfig
 	cd ../ || exit
 
-	if [[ "$@" =~ "lto"* ]]; then
+	if [[ "$@" =~ "flto"* ]]; then
 		# Enable LTO
-		enable_lto
-		make -j${KEBABS} O=${OUT_DIR} 2>&1 | tee build.log
+		enable_flto
+		make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
+	fi
+
+	if [[ "$@" =~ "tlto"* ]]; then
+		# Enable LTO
+		enable_tlto
+		make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
 	else
-		make -j${KEBABS} O=${OUT_DIR} 2>&1 | tee build.log
+		make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
 	fi
 
 	ZIPNAME="Voyager-${DEVICE^^}-build${BUILD}-${OS}-${CSUM}-${DATE}.zip"
@@ -194,7 +207,7 @@ function build_by_list() {
 # Do complie 
 #
 if [ ! -d "anykernel" ]; then
-	git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel && cd anykernel
+	git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel
 fi
 
 START=$(date +"%s")
