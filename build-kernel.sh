@@ -86,17 +86,17 @@ function checkbuild() {
 function out_product() {
 	find ${OUT_DIR}/$dts_source -name '*.dtb' -exec cat {} + >${OUT_DIR}/arch/arm64/boot/dtb
 
-	mkdir -p anykernel/kernels/$os
+	mkdir -p anykernel/kernels/$OS
 	# Import Anykernel3 folder
 	if [[ -f ${OUT_DIR}/arch/arm64/boot/Image.gz ]]; then
-		cp ${OUT_DIR}/arch/arm64/boot/Image.gz anykernel/kernels/$os
+		cp ${OUT_DIR}/arch/arm64/boot/Image.gz anykernel/kernels/$OS
 	else
 		if [[ -f ${OUT_DIR}/arch/arm64/boot/Image ]]; then
-			cp ${OUT_DIR}/arch/arm64/boot/Image anykernel/kernels/$os
+			cp ${OUT_DIR}/arch/arm64/boot/Image anykernel/kernels/$OS
 		fi
 	fi
-	cp ${OUT_DIR}/arch/arm64/boot/dtb anykernel/kernels/$os
-	cp ${OUT_DIR}/arch/arm64/boot/dtbo.img anykernel/kernels/$os
+	cp ${OUT_DIR}/arch/arm64/boot/dtb anykernel/kernels/$OS
+	cp ${OUT_DIR}/arch/arm64/boot/dtbo.img anykernel/kernels/$OS
 
 	# If we use a patch script..
 	if [[ $PATCH_OUT_PRODUCT_HOOK == 1 ]]; then
@@ -147,10 +147,22 @@ function start_build() {
 	# Set some variables for further use
 	#
 	# Let ak3 compress sequence know which system type we use
-	os=${OS,,}
 
-	source build_config/build.args.${OS}
+	if [[ ${OS} == miui ]]; then
+		source ./build_config/build.args.MIUI
+	elif [[ ${OS} == aosp ]]; then
+		source build_config/build.args.AOSP
+	elif [[ ${OS} == aospa ]]; then
+		source build_config/build.args.AOSPA
+	elif [[ ${OS} == custom ]]; then
+		source build_config/build.args.CUSTOM
+	fi
+
 	source build_config/${PACTH_NAME}
+
+	# Set compiler path
+	PATH=${CLANG_PATH}/bin:$PATH
+	export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
 
 	# Make defconfig
 	make -j${KEBABS} ${ARGS} vendor/output/"${DEVICE}"_defconfig

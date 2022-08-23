@@ -2,9 +2,8 @@
 # This is the cross complie invocation, these variables will be export in build-kernel.sh
 #
 
-# Set compiler path
-PATH=/usr/bin/:$PATH
-export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+# Set clang path
+CLANG_PATH=/home/voyager/gclang/clang-r458507
 
 ARGS="ARCH=arm64 \
 O=${OUT_DIR} \

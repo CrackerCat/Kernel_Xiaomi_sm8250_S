@@ -66,10 +66,11 @@ function use_prebuilt_dtbo() {
 	fi
 }
 
+# Edit it by yourself
 function patch_out_product_hook() {
 	if [[ $PREBUILT_DTBO == 1 ]]; then
 		echo "--------- APPLYING PREBUILT DTBO... ---------"
-		cp build_config/prebuilts/dtbo.img anykernel/kernels/$os
+		cp build_config/prebuilts/dtbo.img anykernel/kernels/$OS
 		echo "--------------- DTBO APPLYED! ---------------"
 	fi
 }
