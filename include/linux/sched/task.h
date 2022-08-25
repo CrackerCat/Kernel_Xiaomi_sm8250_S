@@ -60,6 +60,7 @@ static inline int copy_thread_tls(
 }
 #endif
 extern void flush_thread(void);
+extern void sched_post_fork(struct task_struct *p);
 
 #ifdef CONFIG_HAVE_EXIT_THREAD
 extern void exit_thread(struct task_struct *tsk);
