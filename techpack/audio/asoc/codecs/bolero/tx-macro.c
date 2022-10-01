@@ -1070,7 +1070,7 @@ static int tx_macro_enable_dec(struct snd_soc_dapm_widget *w,
 				   msecs_to_jiffies(tx_unmute_delay));
 		if (tx_priv->tx_hpf_work[decimator].hpf_cut_off_freq !=
 							CF_MIN_3DB_150HZ) {
-#if defined(CONFIG_TARGET_PRODUCT_PSYCHE)
+#if defined(CONFIG_TARGET_PRODUCT_PSYCHE) || defined(CONFIG_TARGET_PRODUCT_MUNCH)
 			queue_delayed_work(system_freezable_wq,
 					&tx_priv->tx_hpf_work[decimator].dwork,
 					msecs_to_jiffies(hpf_delay));

@@ -55,9 +55,7 @@
 
 #define HEADSET_EVENT_MAX (5)
 
-#ifdef CONFIG_DEBUG_FS
 static struct dentry* mbhc_debugfs_dir;
-#endif
 
 static ssize_t headset_status_read(struct file *filp, char __user *buffer,
 		size_t count, loff_t *ppos);
@@ -2000,7 +1998,7 @@ int wcd_mbhc_init(struct wcd_mbhc *mbhc, struct snd_soc_component *component,
 	const char *hph_thre = "qcom,msm-mbhc-hs-mic-min-threshold-mv";
 
 	pr_debug("%s: enter\n", __func__);
-#if defined(CONFIG_TARGET_PRODUCT_PSYCHE) | defined(CONFIG_TARGET_PRODUCT_MUNCH) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_TARGET_PRODUCT_PSYCHE) || defined(CONFIG_TARGET_PRODUCT_MUNCH) && defined(CONFIG_DEBUG_FS)
 	mbhc_debugfs_dir = debugfs_create_dir(DEBUGFS_DIR_NAME, NULL);
 	if (!IS_ERR(mbhc_debugfs_dir)) {
 		debugfs_create_file(DEBUGFS_HEADSET_STATUS_FILE_NAME, 0666,
