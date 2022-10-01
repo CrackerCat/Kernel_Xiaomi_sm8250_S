@@ -2496,7 +2496,7 @@ static void fg_monitor_workfunc(struct work_struct *work)
 	interval = fg_check_full_status(bq);
 	fg_check_recharge_status(bq);
 
-	schedule_delayed_work(&bq->monitor_work, interval * HZ);
+	schedule_delayed_work(&bq->monitor_work, 1 * HZ);
 }
 
 static int bq_parse_dt(struct bq_fg_chip *bq)
