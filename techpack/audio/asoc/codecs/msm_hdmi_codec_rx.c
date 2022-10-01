@@ -222,9 +222,9 @@ static int msm_ext_disp_audio_type_get(struct snd_kcontrol *kcontrol,
 	rc = msm_ext_disp_select_audio_codec(codec_data->ext_disp_core_pdev,
 						 &codec_info);
 
-	if (!codec_data->ext_disp_ops.get_audio_edid_blk ||
+	if (!codec_data->ext_disp_ops.cable_status ||
 	    !codec_data->ext_disp_ops.get_intf_id || rc) {
-		dev_err(component->dev, "%s: get_audio_edid_blk() or get_intf_id is NULL\n",
+		dev_err(component->dev, "%s: cable_status() or get_intf_id is NULL\n",
 			__func__);
 		rc = -EINVAL;
 		goto cable_err;
