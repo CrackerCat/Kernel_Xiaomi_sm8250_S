@@ -789,7 +789,7 @@ static int handle_fast_charge(struct step_chg_info *chip, int temp)
 	return rc;
 }
 
-
+extern bool skip_charge_therm;
 /* set JEITA_SUSPEND_HYST_UV to 70mV to avoid recharge frequently when jeita warm */
 #define JEITA_SUSPEND_HYST_UV		120000
 #define JEITA_HYSTERESIS_TEMP_THRED	150
@@ -836,6 +836,13 @@ static int handle_jeita(struct step_chg_info *chip)
 	/* skip processing, event too early */
 	if (elapsed_us < STEP_CHG_HYSTERISIS_DELAY_US  && !update_now)
 		return 0;
+
+	if (skip_charge_therm) {
+		vote(chip->fcc_votable, JEITA_VOTER, false, 0);
+		vote(chip->fv_votable, JEITA_VOTER, false, 0);
+		vote(chip->usb_icl_votable, JEITA_VOTER, false, 0);
+		goto update_time;
+	}
 
 	if (chip->jeita_fcc_config->param.use_bms)
 		rc = power_supply_get_property(chip->bms_psy,

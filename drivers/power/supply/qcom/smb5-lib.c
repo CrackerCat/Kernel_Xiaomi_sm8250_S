@@ -15,6 +15,7 @@
 #include <linux/pmic-voter.h>
 #include <linux/of_batterydata.h>
 #include <linux/ktime.h>
+#include <linux/module.h>
 #include "smb5-lib.h"
 #include "smb5-reg.h"
 #include "schgm-flash.h"
@@ -3326,6 +3327,9 @@ int smblib_get_prop_wireless_fw_version(struct smb_charger *chg,
 	return rc;
 }
 
+bool skip_charge_therm = false;
+module_param(skip_charge_therm, bool, 0644);
+
 static int smblib_dc_therm_charging(struct smb_charger *chg,
 					int temp_level)
 {
@@ -3342,6 +3346,12 @@ static int smblib_dc_therm_charging(struct smb_charger *chg,
 		 * and to do later if use usb mid and dcin wireless charge
 		 */
 		return rc;
+	}
+
+	if (skip_charge_therm) {
+		vote(chg->fcc_votable, THERMAL_DAEMON_VOTER, false, 0);
+		vote(chg->usb_icl_votable, THERMAL_DAEMON_VOTER, false, 0);
+		return 0;
 	}
 
 	if (!chg->wls_psy) {
@@ -3486,6 +3496,12 @@ static int smblib_therm_charging(struct smb_charger *chg)
 
 	if (chg->system_temp_level >= MAX_TEMP_LEVEL)
 		return 0;
+
+	if (skip_charge_therm) {
+		vote(chg->fcc_votable, THERMAL_DAEMON_VOTER, false, 0);
+		vote(chg->usb_icl_votable, THERMAL_DAEMON_VOTER, false, 0);
+		return 0;
+	}
 
 	switch (chg->real_charger_type) {
 	case POWER_SUPPLY_TYPE_USB_HVDCP:
