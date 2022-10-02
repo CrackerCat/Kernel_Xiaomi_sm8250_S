@@ -938,6 +938,7 @@ static int handle_fast_charge_mode(struct step_chg_info *chip, int temp)
 	return rc;
 }
 
+extern bool skip_charge_therm;
 /* set JEITA_SUSPEND_HYST_UV to 70mV to avoid recharge frequently when jeita warm */
 #define JEITA_SUSPEND_HYST_UV		240000
 #define JEITA_HYSTERESIS_TEMP_THRED	150
@@ -997,6 +998,13 @@ static int handle_jeita(struct step_chg_info *chip)
 	}
 
 	temp = pval.intval;
+
+	if (skip_charge_therm) {
+		vote(chip->fcc_votable, JEITA_VOTER, false, 0);
+		vote(chip->fv_votable, JEITA_VOTER, false, 0);
+		vote(chip->input_suspend_votable, JEITA_VOTER, false, 0);
+		goto update_time;
+	}
 
 	if (chip->cold_step_chg_cfg_valid) {
 		if (chip->cold_step_chg_config->param.use_bms)
