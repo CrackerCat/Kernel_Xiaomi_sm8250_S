@@ -236,7 +236,7 @@ struct sde_dbg_reglog *sde_reglog_init(void)
 {
 	struct sde_dbg_reglog *reglog;
 
-	reglog = vzalloc(sizeof(*reglog));
+	reglog = kzalloc(sizeof(*reglog), GFP_KERNEL);
 	if (!reglog)
 		return ERR_PTR(-ENOMEM);
 
@@ -354,3 +354,4 @@ void sde_reglog_destroy(struct sde_dbg_reglog *reglog)
 
 	vfree(reglog);
 }
+

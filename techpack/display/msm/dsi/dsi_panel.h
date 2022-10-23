@@ -23,6 +23,7 @@
 #include "msm_drv.h"
 #include "dsi_panel_mi.h"
 
+
 #define MAX_BL_LEVEL 4096
 #define MAX_BL_SCALE_LEVEL 1024
 #define MAX_SV_BL_SCALE_LEVEL 65535
@@ -149,8 +150,10 @@ struct dsi_panel_reset_config {
 	u32 count;
 
 	int reset_gpio;
+	int tp_reset_gpio;
 	int disp_en_gpio;
 	int lcd_mode_sel_gpio;
+	u32 reset_powerdown_delay;
 	u32 mode_sel_state;
 };
 
@@ -212,6 +215,7 @@ struct dsi_panel {
 
 	struct dsi_regulator_info power_info;
 	struct dsi_backlight_config bl_config;
+	struct dsi_backlight_config bl_slaver_config;
 	struct dsi_panel_reset_config reset_config;
 	struct dsi_pinctrl_info pinctrl;
 	struct drm_panel_hdr_properties hdr_props;
@@ -237,6 +241,7 @@ struct dsi_panel {
 	bool sync_broadcast_en;
 
 	struct dsi_panel_mi_cfg mi_cfg;
+
 	int panel_test_gpio;
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;

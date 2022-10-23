@@ -2181,6 +2181,9 @@ static int dsi_ctrl_dev_probe(struct platform_device *pdev)
 		DSI_CTRL_DEBUG(dsi_ctrl, "failed to init axi bus client, rc = %d\n",
 				rc);
 
+	if (dsi_ctrl->hw.ops.map_mdp_regs)
+		dsi_ctrl->hw.ops.map_mdp_regs(pdev, &dsi_ctrl->hw);
+
 	item->ctrl = dsi_ctrl;
 
 	mutex_lock(&dsi_ctrl_list_lock);

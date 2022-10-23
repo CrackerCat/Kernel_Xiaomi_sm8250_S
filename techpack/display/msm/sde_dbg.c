@@ -3539,11 +3539,13 @@ static void _sde_dump_array(struct sde_dbg_reg_base *blk_arr[],
 	int i;
 	u32 reg_dump_size;
 	struct sde_dbg_base *dbg_base = &sde_dbg_base;
+	phys_addr_t phys = 0;
 
 	mutex_lock(&sde_dbg_base.mutex);
 
 	reg_dump_size =  _sde_dbg_get_reg_dump_size();
-	dbg_base->reg_dump_addr = vzalloc(reg_dump_size);
+	dbg_base->reg_dump_addr = dma_alloc_coherent(sde_dbg_base.dev,
+			reg_dump_size, &phys, GFP_KERNEL);
 
 	if (dump_all)
 		sde_evtlog_dump_all(sde_dbg_base.evtlog);

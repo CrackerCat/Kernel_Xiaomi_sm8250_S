@@ -411,4 +411,18 @@ int sde_encoder_vid_wait_for_active(struct drm_encoder *enc);
  */
 void sde_encoder_trigger_early_wakeup(struct drm_encoder *drm_enc);
 
+/**
+ * sde_encoder_virt_reset - delay encoder virt reset
+ * @drm_enc:	Pointer to drm encoder structure
+ */
+void sde_encoder_virt_reset(struct drm_encoder *drm_enc);
+
+bool get_sde_encoder_virt_prepare_kickoff(struct drm_connector *connector);
+
+bool get_sde_encoder_virt_ready_kickoff(struct drm_connector *connector);
+
+void set_sde_encoder_virt_prepare_kickoff(struct drm_connector *connector,bool enable);
+
+void set_sde_encoder_virt_ready_kickoff(struct drm_connector *connector,bool enable);
+
 #endif /* __SDE_ENCODER_H__ */

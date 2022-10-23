@@ -19,6 +19,10 @@
 #define MDP_INTF_TEAR_LINE_COUNT_OFFSET 0x30
 #define MDP_INTF_LINE_COUNT_OFFSET 0xB0
 
+/* MDP INTF registers to be mapped*/
+#define MDP_INTF1_TEAR_LINE_COUNT 0xAE6BAB0
+#define MDP_INTF1_LINE_COUNT 0xAE6B8B0
+
 /**
  * dsi_ctrl_hw_22_phy_reset_config() - to configure clamp control during ulps
  * @ctrl:          Pointer to the controller host hardware.
@@ -132,6 +136,43 @@ void dsi_ctrl_hw_22_config_clk_gating(struct dsi_ctrl_hw *ctrl, bool enable,
 		reg &= ~enable_select;
 
 	DSI_DISP_CC_W32(ctrl, DISP_CC_MISC_CMD_REG_OFF, reg);
+}
+
+/**
+ * dsi_ctrl_hw_22_map_mdp_regs() - maps MDP interface line count registers.
+ * @pdev:		Pointer to platform device.
+ * @ctrl:		Pointer to the controller host hardware.
+ *
+ * Return: 0 on success and error on failure.
+ */
+int dsi_ctrl_hw_22_map_mdp_regs(struct platform_device *pdev,
+			struct dsi_ctrl_hw *ctrl)
+{
+	int rc = 0;
+	void __iomem *ptr = NULL, *ptr1 = NULL;
+
+	if (ctrl->index == 0) {
+		ptr = devm_ioremap(&pdev->dev, MDP_INTF1_TEAR_LINE_COUNT, 1);
+		if (IS_ERR_OR_NULL(ptr)) {
+			DSI_CTRL_HW_ERR(ctrl,
+				"MDP TE LINE COUNT address not found\n");
+			rc = PTR_ERR(ptr);
+			return rc;
+		}
+
+		ptr1 = devm_ioremap(&pdev->dev, MDP_INTF1_LINE_COUNT, 1);
+		if (IS_ERR_OR_NULL(ptr1)) {
+			DSI_CTRL_HW_ERR(ctrl,
+				"MDP TE LINE COUNT address not found\n");
+			rc = PTR_ERR(ptr1);
+			return rc;
+		}
+	}
+
+	ctrl->te_rd_ptr_reg = ptr;
+	ctrl->line_count_reg = ptr1;
+
+	return rc;
 }
 
 /**

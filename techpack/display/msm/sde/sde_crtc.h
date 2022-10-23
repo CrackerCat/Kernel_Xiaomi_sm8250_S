@@ -291,6 +291,7 @@ struct sde_crtc_misr_info {
  * @comp_ratio      : Compression ratio
  * @dspp_blob_info  : blob containing dspp hw capability information
  * @hist_irq_idx    : hist interrupt irq idx
+ * @dspp_blob_info  : blob containing dspp hw capability information
  */
 struct sde_crtc {
 	struct drm_crtc base;
@@ -382,6 +383,7 @@ struct sde_crtc {
 	int hist_irq_idx;
 
 	int comp_ratio;
+	uint32_t mi_dimlayer_type;
 
 	struct drm_property_blob *dspp_blob_info;
 };
@@ -461,6 +463,7 @@ struct sde_crtc_mi_state {
  * @new_perf: new performance state being requested
  * @secure_session: Indicates the type of secure session
  * @mi_state: Mi part of crtc state
+ * @secure_session: Indicates the type of secure session
  */
 struct sde_crtc_state {
 	struct drm_crtc_state base;
