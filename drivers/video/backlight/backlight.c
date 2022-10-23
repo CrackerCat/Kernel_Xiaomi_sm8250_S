@@ -521,6 +521,44 @@ struct backlight_device *backlight_device_get_by_type(enum backlight_type type)
 }
 EXPORT_SYMBOL(backlight_device_get_by_type);
 
+struct backlight_device *backlight_device_get_by_type_a(enum backlight_type type)
+{
+	bool found = false;
+	struct backlight_device *bd;
+
+	mutex_lock(&backlight_dev_list_mutex);
+	list_for_each_entry(bd, &backlight_dev_list, entry) {
+		if (bd->props.type == type && !strcmp(bd->dev.kobj.name, "KTZ8866A")) {
+			found = true;
+			break;
+		}
+	}
+	mutex_unlock(&backlight_dev_list_mutex);
+
+	return found ? bd : NULL;
+}
+EXPORT_SYMBOL(backlight_device_get_by_type_a);
+
+struct backlight_device *backlight_device_get_by_type_b(enum backlight_type type)
+{
+	bool found = false;
+	struct backlight_device *bd;
+
+	mutex_lock(&backlight_dev_list_mutex);
+	list_for_each_entry(bd, &backlight_dev_list, entry) {
+		if (bd->props.type == type && !strcmp(bd->dev.kobj.name, "KTZ8866B")) {
+			found = true;
+			break;
+		}
+	}
+	mutex_unlock(&backlight_dev_list_mutex);
+
+	return found ? bd : NULL;
+}
+EXPORT_SYMBOL(backlight_device_get_by_type_b);
+
+
+
 /**
  * backlight_device_unregister - unregisters a backlight device object.
  * @bd: the backlight device object to be unregistered and freed.
@@ -719,6 +757,12 @@ struct backlight_device *of_find_backlight(struct device *dev)
 			of_node_put(np);
 			if (!bd)
 				return ERR_PTR(-EPROBE_DEFER);
+			/*
+			 * Note: gpio_backlight uses brightness as
+			 * power state during probe
+			 */
+			if (!bd->props.brightness)
+				bd->props.brightness = bd->props.max_brightness;
 		}
 	}
 
