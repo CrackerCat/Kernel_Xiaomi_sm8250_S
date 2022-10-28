@@ -7792,6 +7792,7 @@ cpu_cgroup_css_alloc(struct cgroup_subsys_state *parent_css)
 	if (IS_ERR(tg))
 		return ERR_PTR(-ENOMEM);
 
+	walt_init_sched_boost(tg);
 	return &tg->css;
 }
 

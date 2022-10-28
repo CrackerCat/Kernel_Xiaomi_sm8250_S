@@ -2965,7 +2965,11 @@ void add_new_task_to_grp(struct task_struct *new)
 	 * lock. Even if there is a race, it will be added
 	 * to the co-located cgroup via cgroup attach.
 	 */
+#ifdef CONFIG_SCHED_TUNE
 	if (!schedtune_task_colocated(new))
+#else
+	if (!uclamp_task_colocated(new))
+#endif
 		return;
 
 	grp = lookup_related_thread_group(DEFAULT_CGROUP_COLOC_ID);
@@ -2976,7 +2980,11 @@ void add_new_task_to_grp(struct task_struct *new)
 	 * group. or it might have taken out from the colocated schedtune
 	 * cgroup. check these conditions under lock.
 	 */
+#ifdef CONFIG_SCHED_TUNE
 	if (!schedtune_task_colocated(new) || new->grp) {
+#else
+	if (!uclamp_task_colocated(new) || new->grp) {
+#endif
 		write_unlock_irqrestore(&related_thread_group_lock, flags);
 		return;
 	}
