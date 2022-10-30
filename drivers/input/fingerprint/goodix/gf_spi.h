@@ -2,6 +2,7 @@
  * driver definition for sensor driver
  *
  * Coypright (c) 2017 Goodix
+ * Copyright (C) 2022 XiaoMi, Inc.
  */
 #ifndef __GF_SPI_H
 #define __GF_SPI_H

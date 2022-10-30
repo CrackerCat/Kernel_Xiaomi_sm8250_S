@@ -2,6 +2,7 @@
  * platform indepent driver interface
  *
  * Coypritht (c) 2017 Goodix
+ * Copyright (C) 2022 XiaoMi, Inc.
  */
 #define DEBUG
 #define pr_fmt(fmt)     "gf_platform: " fmt
