@@ -152,6 +152,9 @@ endif
 ifeq ($(CONFIG_BOARD_CMI),y)
 $(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
 endif
+ifeq ($(CONFIG_BOARD_ELISH),y)
+$(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
+endif
 ifeq ($(CONFIG_BOARD_UCMI),y)
 $(obj)/config_data.gz: arch/arm64/configs/ucmi-stock_defconfig FORCE
 endif
