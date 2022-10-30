@@ -1007,6 +1007,15 @@ config SERIAL_MSM_GENI_HALF_SAMPLING
 	  As earlycon can't have HW version awareness, decision is taken
 	  based on the configuration.
 
+config SERIAL_MSM_GENI_ELISH
+	tristate "MSM on-chip elish GENI HW based serial port support"
+	depends on ARCH_QCOM
+	select SERIAL_CORE
+	help
+	    Serial driver for Qualcomm Technologies Inc's GENI based QUPv3
+	    hardware.
+	    The driver supports console and High speed UART functions.
+
 config SERIAL_MSM_GENI_EARLY_CONSOLE
 	bool "MSM on-chip GENI HW based early console support"
 	select SERIAL_MSM_GENI_HALF_SAMPLING
