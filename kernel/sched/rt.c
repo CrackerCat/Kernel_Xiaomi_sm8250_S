@@ -1537,13 +1537,27 @@ task_may_not_preempt(struct task_struct *task, int cpu)
 		 task_thread_info(task)->preempt_count & SOFTIRQ_MASK));
 }
 
+static int rt_energy_aware_wake_cpu(struct task_struct *task);
+
 static int
 select_task_rq_rt(struct task_struct *p, int cpu, int sd_flag, int flags,
 		  int sibling_count_hint)
 {
 	struct task_struct *curr;
 	struct rq *rq;
+	int target = -1;
 	bool may_not_preempt;
+
+	/*
+	 * If cpu is non-preemptible, prefer remote cpu
+	 * even if it's running a higher-prio task.
+	 * Otherwise: Don't bother moving it if the destination CPU is
+	 * not running a lower priority task.
+	 */
+	target = rt_energy_aware_wake_cpu(p);
+	if (target != -1 &&
+	    (may_not_preempt || p->prio < cpu_rq(target)->rt.highest_prio.curr))
+		goto out;
 
 	/* For anything but wake ups, just return the task_cpu */
 	if (sd_flag != SD_BALANCE_WAKE && sd_flag != SD_BALANCE_FORK)
@@ -1822,6 +1836,7 @@ static int rt_energy_aware_wake_cpu(struct task_struct *task)
 	int best_cpu_idle_idx = INT_MAX;
 	int cpu_idle_idx = -1;
 	bool boost_on_big = rt_boost_on_big();
+	bool best_cpu_lt = true;
 
 	rcu_read_lock();
 
@@ -1838,6 +1853,7 @@ retry:
 	do {
 		int fcpu = group_first_cpu(sg);
 		int capacity_orig = capacity_orig_of(fcpu);
+		int lt;
 
 		if (boost_on_big) {
 			if (is_min_capacity_cpu(fcpu))
@@ -1862,6 +1878,23 @@ retry:
 
 			util = cpu_util(cpu);
 
+			lt = (walt_low_latency_task(cpu_rq(cpu)->curr) ||
+				walt_nr_rtg_high_prio(cpu));
+
+			/*
+			 * When the best is suitable and the current is not,
+			 * skip it
+			 */
+			if (lt && !best_cpu_lt)
+				continue;
+
+			/*
+			 * Either both are sutilable or unsuitable, load takes
+			 * precedence.
+			 */
+			if (!(best_cpu_lt ^ lt) && (util > best_cpu_util))
+				continue;
+
 			/* Find the least loaded CPU */
 			if (util > best_cpu_util)
 				continue;
@@ -1881,7 +1914,7 @@ retry:
 			 * window demand CPU.
 			 */
 			if (sysctl_sched_cstate_aware)
-				cpu_idle_idx = idle_get_state_idx(cpu_rq(cpu));
+				cpu_idle_idx = walt_get_idle_exit_latency(cpu_rq(cpu));
 
 			util_cum = cpu_util_cum(cpu, 0);
 			if (cpu != task_cpu(task) && best_cpu_util == util) {
@@ -1898,6 +1931,7 @@ retry:
 			best_cpu_util = util;
 			best_cpu = cpu;
 			best_capacity = capacity_orig;
+			best_cpu_lt = lt;
 		}
 
 	} while (sg = sg->next, sg != sd->groups);
