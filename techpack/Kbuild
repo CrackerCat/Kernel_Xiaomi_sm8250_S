@@ -2,14 +2,17 @@
 TECHPACK?=y
 
 ifdef CONFIG_BOARD_CAS
-obj-y += stub/ audio/ data/ camera_cas/ video/ display/
-header-y += stub/include/uapi/ audio/include/uapi/ camera_cas/include/uapi/
+obj-y += audio/ data/ camera_cas/ video/ display/
+header-y += audio/include/uapi/ camera_cas/include/uapi/
 else
 ifdef CONFIG_BOARD_PSYCHE
-obj-y += stub/ audio_psy/ data/ camera/ video/ display/
-header-y += stub/include/uapi/ audio_psy/include/uapi/ camera/include/uapi/
+obj-y += audio_psy/ data/ camera/ video/ display/
+header-y += audio_psy/include/uapi/ camera/include/uapi/
 else
-obj-y += stub/ audio/ data/ camera/ video/ display/
-header-y += stub/include/uapi/ audio/include/uapi/ camera/include/uapi/
+obj-y += audio/ data/ camera/ video/ display/
+header-y += audio/include/uapi/ camera/include/uapi/
 endif
 endif
+
+obj-y += stub/ wlan/
+header-y += stub/include/uapi/ wlan/qcacld-3.0/uapi/
