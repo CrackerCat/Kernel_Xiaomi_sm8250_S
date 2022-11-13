@@ -577,53 +577,9 @@ static int cnss_get_bdf_file_name(struct cnss_plat_data *plat_priv,
 	case CNSS_BDF_ELF:
 		/* Board ID will be equal or less than 0xFF in GF mask case */
 		if (plat_priv->board_info.board_id == 0xFF) {
-<<<<<<< HEAD
-			if (hw_platform_ver == HARDWARE_PLATFORM_LMI) {
-				if (get_hw_country_version() == (uint32_t)CountryGlobal)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J11_GLOBAL);
-				else if (get_hw_country_version() == (uint32_t)CountryIndia)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J11_INDIA);
-				else {
-					if ((get_hw_version_minor() == (uint32_t)HW_MINOR_VERSION_B) &&
-					    (get_hw_version_major() == (uint32_t)HW_MAJOR_VERSION_B))
-						snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J11_B_BOM);
-					else
-						snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J11);
-				}
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_CAS) {
-				snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J1S);
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_THYME) {
-				snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J2S);
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_APOLLO) {
-				if (get_hw_country_version() == (uint32_t)CountryGlobal)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J3S_GLOBAL);
-				else if (get_hw_country_version() == (uint32_t)CountryIndia)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J3S_INDIA);
-				else
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_J3S);
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_ALIOTH) {
-				if (get_hw_country_version() == (uint32_t)CountryGlobal)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_K11A_GLOBAL);
-				else if (get_hw_country_version() == (uint32_t)CountryIndia)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_K11A_INDIA);
-				else
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_K11A);
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_ENUMA) {
-				snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_K81);
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_ELISH) {
-				snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_K81A);
-			} else if (hw_platform_ver == HARDWARE_PLATFORM_MUNCH) {
-				if (get_hw_country_version() == (uint32_t)CountryGlobal)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_L11R_GLOBAL);
-				else if (get_hw_country_version() == (uint32_t)CountryIndia)
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_L11R_INDIA);
-				else
-				    snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_L11R);
-=======
 			if (plat_priv->chip_info.chip_id & CHIP_ID_GF_MASK) {
 				snprintf(filename_tmp, filename_len,
 					 ELF_BDF_FILE_NAME_GF);
->>>>>>> 91cf5072b4d47 (cnss2: Structure bdwlan firmware loading into nested switch case)
 			} else {
 				switch (hw_platform_ver) {
 				case HARDWARE_PLATFORM_LMI:
@@ -694,9 +650,11 @@ static int cnss_get_bdf_file_name(struct cnss_plat_data *plat_priv,
 					else
 						snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_L11R);
 					break;
+/*
 				case HARDWARE_PLATFORM_DAGU:
 					snprintf(filename_tmp, filename_len, ELF_BDF_FILE_NAME_L81A);
 					break;
+*/
 				default:
 					snprintf(filename_tmp, filename_len,  ELF_BDF_FILE_NAME);
 					break;
