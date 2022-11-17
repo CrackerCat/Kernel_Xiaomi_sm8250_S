@@ -471,6 +471,7 @@ config INET_DIAG_DESTROY
 
 menuconfig TCP_CONG_ADVANCED
 	bool "TCP: advanced congestion control"
+        default y
 	---help---
 	  Support for selection of various TCP congestion control
 	  modules.
@@ -506,7 +507,7 @@ config TCP_CONG_CUBIC
 
 config TCP_CONG_WESTWOOD
 	tristate "TCP Westwood+"
-	default m
+	default y
 	---help---
 	TCP Westwood+ is a sender-side only modification of the TCP Reno
 	protocol stack that optimizes the performance of TCP congestion
@@ -520,7 +521,7 @@ config TCP_CONG_WESTWOOD
 
 config TCP_CONG_HTCP
         tristate "H-TCP"
-        default m
+        default y
 	---help---
 	H-TCP is a send-side only modifications of the TCP Reno
 	protocol stack that optimizes the performance of TCP
@@ -531,7 +532,7 @@ config TCP_CONG_HTCP
 
 config TCP_CONG_HSTCP
 	tristate "High Speed TCP"
-	default n
+	default y
 	---help---
 	Sally Floyd's High Speed TCP (RFC 3649) congestion control.
 	A modification to TCP's congestion control mechanism for use
@@ -550,7 +551,7 @@ config TCP_CONG_HYBLA
 
 config TCP_CONG_VEGAS
 	tristate "TCP Vegas"
-	default n
+	default y
 	---help---
 	TCP Vegas is a sender-side only change to TCP that anticipates
 	the onset of congestion by estimating the bandwidth. TCP Vegas
@@ -668,7 +669,7 @@ config TCP_CONG_CDG
 
 config TCP_CONG_BBR
 	tristate "BBR TCP"
-	default n
+	default y
 	---help---
 
 	BBR (Bottleneck Bandwidth and RTT) TCP congestion control aims to
