@@ -2174,7 +2174,7 @@ static void f2fs_enable_checkpoint(struct f2fs_sb_info *sbi)
 
 	if (unlikely(retry < 0))
 		f2fs_warn(sbi, "checkpoint=enable has some unwritten data.");
-
+  
 	f2fs_down_write(&sbi->gc_lock);
 
 	f2fs_dirty_to_prefree(sbi);

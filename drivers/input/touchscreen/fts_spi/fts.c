@@ -6189,7 +6189,7 @@ static void fts_update_touchmode_data(void)
 	u8 get_value[8] = {0x0,};
 	int temp_value = 0;
 	const struct fts_hw_platform_data *bdata = fts_info->board;
-	static expert_mode = false;
+	static bool expert_mode = false;
 
 	if (fts_info->tp_pm_suspend) {
 		logError(1, "%s %s tp is in suspend mode,do't set gamemode\n", tag, __func__);
