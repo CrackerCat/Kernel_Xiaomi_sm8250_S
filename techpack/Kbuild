@@ -5,13 +5,8 @@ ifdef CONFIG_BOARD_CAS
 obj-y += audio/ data/ camera_cas/ video/ display/
 header-y += audio/include/uapi/ camera_cas/include/uapi/
 else
-ifdef CONFIG_BOARD_PSYCHE
-obj-y += audio_psy/ data/ camera/ video/ display/
-header-y += audio_psy/include/uapi/ camera/include/uapi/
-else
 obj-y += audio/ data/ camera/ video/ display/
 header-y += audio/include/uapi/ camera/include/uapi/
-endif
 endif
 
 obj-y += stub/ wlan/
