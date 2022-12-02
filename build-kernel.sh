@@ -86,6 +86,10 @@ function checkbuild() {
 function out_product() {
 	find ${OUT_DIR}/$dts_source -name '*.dtb' -exec cat {} + >${OUT_DIR}/arch/arm64/boot/dtb
 
+if [ ! -d "anykernel" ]; then
+	git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel
+fi
+
 	mkdir -p anykernel/kernels/$OS
 	# Import Anykernel3 folder
 	if [[ -f ${OUT_DIR}/arch/arm64/boot/Image.gz ]]; then
@@ -218,9 +222,7 @@ function build_by_list() {
 #
 # Do complie 
 #
-if [ ! -d "anykernel" ]; then
-	git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel
-fi
+
 
 START=$(date +"%s")
 
