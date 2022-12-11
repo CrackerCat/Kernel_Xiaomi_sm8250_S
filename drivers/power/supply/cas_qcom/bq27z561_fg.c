@@ -1603,7 +1603,11 @@ static int fg_set_property(struct power_supply *psy,
 			bq->optimiz_soc = bq->batt_soc;
 		break;
 	case POWER_SUPPLY_PROP_AUTHENTIC:
+#ifdef CONFIG_BQ_FAKE_VERIFY
+		bq->verify_digest_success = true;
+#else
 		bq->verify_digest_success = !!val->intval;
+#endif
 		if (!bq->fcc_votable)
 			bq->fcc_votable = find_votable("FCC");
 		vote(bq->fcc_votable, BMS_FG_VERIFY, !bq->verify_digest_success,
