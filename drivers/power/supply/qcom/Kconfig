@@ -307,4 +307,9 @@ config LN8282
 	  The driver controls 8282 via I2C and
 	  supports device-tree interface.
 
+config BQ_FAKE_VERIFY
+	bool
+	default n
+	help
+	 Remove battery verification
 endmenu

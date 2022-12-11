@@ -1836,7 +1836,11 @@ static int fg_set_property(struct power_supply *psy,
 		bq->optimiz_soc = val->intval;
 		break;
 	case POWER_SUPPLY_PROP_AUTHENTIC:
+#ifdef CONFIG_BQ_FAKE_VERIFY
+		bq->verify_digest_success = true;
+#else
 		bq->verify_digest_success = !!val->intval;
+#endif
 #ifndef CONFIG_DUAL_FUEL_GAUGE_BQ27Z561
 		if (!bq->fcc_votable)
 			bq->fcc_votable = find_votable("FCC");
