@@ -26,6 +26,8 @@
 #include "dual_fuel_gauge_class.h"
 #endif
 
+#include <misc/voyager.h>
+
 #define smblib_err(chg, fmt, ...)		\
 	pr_err("%s: %s: " fmt, chg->name,	\
 		__func__, ##__VA_ARGS__)	\
@@ -3326,9 +3328,6 @@ int smblib_get_prop_wireless_fw_version(struct smb_charger *chg,
 				       POWER_SUPPLY_PROP_WIRELESS_FW_VERSION, val);
 	return rc;
 }
-
-bool skip_charge_therm = false;
-module_param(skip_charge_therm, bool, 0644);
 
 static int smblib_dc_therm_charging(struct smb_charger *chg,
 					int temp_level)

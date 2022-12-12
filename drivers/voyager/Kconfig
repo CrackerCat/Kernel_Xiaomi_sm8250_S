@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+config CHARGE_THERMAL_SKIP
+	bool
+	default y
+	help
+	 Skip charge thermal
+
+config MI_THERMAL_SWITCH
+	bool
+	default y
+	help
+	 Say Y to control whether use Mi thermal interface

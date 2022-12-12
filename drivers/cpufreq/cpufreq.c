@@ -34,6 +34,7 @@
 #include <linux/sched/sysctl.h>
 
 #include <trace/events/power.h>
+#include <misc/voyager.h>
 
 static LIST_HEAD(cpufreq_policy_list);
 
@@ -2267,8 +2268,9 @@ static int cpufreq_set_policy(struct cpufreq_policy *policy,
 			CPUFREQ_ADJUST, new_policy);
 
 	/* the adjusted frequency should not exceed thermal limit*/
-	blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
-			CPUFREQ_THERMAL, new_policy);
+	if (mi_thermal_switch)
+	        blocking_notifier_call_chain(&cpufreq_policy_notifier_list,
+			        CPUFREQ_THERMAL, new_policy);
 
 	/*
 	 * verify the cpu speed can be set within this limit, which might be

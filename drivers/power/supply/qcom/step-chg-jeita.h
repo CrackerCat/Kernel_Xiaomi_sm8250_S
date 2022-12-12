@@ -4,6 +4,8 @@
  * Copyright (C) 2021 XiaoMi, Inc.
  */
 
+#include <misc/voyager.h>
+
 #ifndef __STEP_CHG_H__
 #define __STEP_CHG_H__
 
