@@ -861,6 +861,7 @@ config ARCH_HAS_PTE_SPECIAL
 # multi-gen LRU {
 config LRU_GEN
 	bool "Multi-Gen LRU"
+	default y
 	depends on MMU
 	# make sure page->flags has enough spare bits
 	depends on 64BIT || !SPARSEMEM || SPARSEMEM_VMEMMAP
@@ -870,6 +871,7 @@ config LRU_GEN
 
 config LRU_GEN_ENABLED
 	bool "Enable by default"
+	default y
 	depends on LRU_GEN
 	help
 	  This option enables the multi-gen LRU by default.
