@@ -15,6 +15,8 @@
 #include <linux/pmic-voter.h>
 #include "step-chg-jeita.h"
 
+#include <misc/voyager.h>
+
 #define STEP_CHG_VOTER		"STEP_CHG_VOTER"
 #define SOC_FCC_VOTER		"SOC_FCC_VOTER"
 #define STEP_BMS_CHG_VOTER	"STEP_BMS_CHG_VOTER"
@@ -938,7 +940,6 @@ static int handle_fast_charge_mode(struct step_chg_info *chip, int temp)
 	return rc;
 }
 
-extern bool skip_charge_therm;
 /* set JEITA_SUSPEND_HYST_UV to 70mV to avoid recharge frequently when jeita warm */
 #define JEITA_SUSPEND_HYST_UV		240000
 #define JEITA_HYSTERESIS_TEMP_THRED	150
