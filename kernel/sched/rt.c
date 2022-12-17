@@ -1557,7 +1557,7 @@ select_task_rq_rt(struct task_struct *p, int cpu, int sd_flag, int flags,
 	target = rt_energy_aware_wake_cpu(p);
 	if (target != -1 &&
 	    (may_not_preempt || p->prio < cpu_rq(target)->rt.highest_prio.curr))
-		goto out;
+		return target;
 
 	/* For anything but wake ups, just return the task_cpu */
 	if (sd_flag != SD_BALANCE_WAKE && sd_flag != SD_BALANCE_FORK)
