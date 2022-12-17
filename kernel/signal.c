@@ -49,8 +49,11 @@
 #ifdef CONFIG_MILLET
 #include <linux/millet.h>
 #endif
+#include <misc/voyager.h>
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/signal.h>
+#include <trace/hooks/misc.h>
 
 #include <asm/param.h>
 #include <linux/uaccess.h>
@@ -3388,7 +3391,12 @@ static inline void prepare_kill_siginfo(int sig, struct siginfo *info)
 SYSCALL_DEFINE2(kill, pid_t, pid, int, sig)
 {
 	struct siginfo info;
+        bool ignored = false;
 
+        sigkill_filter(current, &info, pid, &ignored);
+        if (ignored)
+                return -EPERM;
+        
 	prepare_kill_siginfo(sig, &info);
 
 	return kill_something_info(sig, &info, pid);
