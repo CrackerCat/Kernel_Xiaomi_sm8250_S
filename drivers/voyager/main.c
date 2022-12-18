@@ -22,36 +22,34 @@ module_param(skip_charge_therm, bool, 0644);
 module_param(mi_thermal_switch, bool, 0644);
 module_param(enhance_background, bool, 0644);
 
-static const char *target = "ActivityManager";
+#define vk_err(fmt, ...) \
+	pr_err("kernel addon: %s: " fmt, __func__, ##__VA_ARGS__)
 
-inline void sigkill_filter(struct task_struct *t, struct siginfo *info, pid_t pid, bool ignored)
+static const char *target[] = {
+        "MiuiMemoryServic",
+        "lmkd",
+};
+
+inline void sigkill_filter(struct siginfo *info, bool *ignored)
 {
-	struct task_struct *pid_task;
-	struct pid *pid_struct;
-	int sig;
-
-	if (!inited)
-	        return;
-
-	sig = info->si_signo;
-	if (pid < 0)
-		pid = -pid;
+        struct task_struct *tsk;
+        int sig = info->si_signo;
+        int *pid = &info->si_pid;
+	int i;
 
 	if (sig != SIGKILL && sig != SIGTERM)
 	        return;
+        
+        tsk = pid_task((void *)pid, PIDTYPE_PID);
+        if (tsk == NULL)
+                return;
 
-	pid_struct = find_get_pid(pid);
-	if (!pid_struct)
-		return;
-
-	pid_task = get_pid_task(pid_struct, PIDTYPE_PID);
-	if (!pid_task)
-		return;
-
-	if (!strcmp(target, t->comm))
-		ignored = true;
-        else
-	        return;
+        for (i = 0; i < ARRAY_SIZE(target); i++) {
+	        if (!strcmp(tsk->comm, target[i]))
+                        vk_err("Blocking \"%s\"(%d) send signal %d to "
+				"\"%s\"(%d)\n", NULL);
+	        	*ignored = true;
+        }
 }
 
 static int __init kernel_addon_init(void) {
