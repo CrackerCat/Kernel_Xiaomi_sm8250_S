@@ -2,16 +2,14 @@
 # This is the cross complie invocation, these variables will be export in build-kernel.sh
 #
 
-# Set clang path
-CLANG_PATH=/home/voyager/gclang/clang-r458507
-
-ARGS="ARCH=arm64 \
-O=${OUT_DIR} \
-LLVM=1 \
-CLANG_TRIPLE=aarch64-linux-gnu- \
-CROSS_COMPILE=aarch64-linux-gnu- \
-CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
--j${KEBABS}"
+ARCH=arm64
+LLVM=1
+CLANG_TRIPLE=aarch64-linux-gnu-
+CROSS_COMPILE=aarch64-linux-gnu-
+CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
+CC="ccache clang"
+HOSTCC="ccache gcc"
+HOSTCXX="ccache g++"
 
 #
 # If you need overwrite some config but don't want to change defconfig, then use the function below to 
@@ -26,20 +24,16 @@ function overwrite_config() {
 	scripts/config --file ${OUT_DIR}/.config \
 		--set-str STATIC_USERMODEHELPER_PATH /system/bin/micd \
 		--set-str SYSTEM_TRUSTED_KEYS "" \
-		-e	MIUI_ZRAM_MEMORY_TRACKING\
 		-e	VOYAGER_ADDON		\
 		-e	SCHED_EXT		\
 		-e	WALT_EXT		\
-		-e	MIHW			\
-		-e	PERF_CRITICAL_RT_TASK	\
+		-e	PERF_CRITICAL_RT_TASK		\
 		-e	SF_BINDER		\
 		-e	PACKAGE_RUNTIME_INFO	\
-		-e	MILLET			\
+		-e	MIGT			\
 		-e	MIGT_ENERGY_MODEL	\
 		-d	UNICODE
 }
 
 # Use it to change the path or name of your extra script
-PACTH_NAME=patch_MIUI.sh
-
-PATCH_OUT_PRODUCT_HOOK=1
+PACTH_NAME=patch.sh
