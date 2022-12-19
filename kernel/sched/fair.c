@@ -176,8 +176,8 @@ unsigned int sysctl_sched_min_task_util_for_boost = 51;
 /* 0.68ms default for 20ms window size scaled to 1024 */
 unsigned int sysctl_sched_min_task_util_for_colocation = 35;
 __read_mostly unsigned int sysctl_sched_prefer_spread;
-unsigned int sysctl_walt_rtg_cfs_boost_prio = 99; /* disabled by default */
-unsigned int sysctl_walt_low_latency_task_threshold; /* disabled by default */
+unsigned int sysctl_walt_rtg_cfs_boost_prio = 119; /* disabled by default */
+unsigned int sysctl_walt_low_latency_task_threshold = 325; /* disabled by default */
 #endif
 unsigned int sched_small_task_threshold = 102;
 __read_mostly unsigned int sysctl_sched_force_lb_enable = 1;
@@ -7596,6 +7596,10 @@ static void select_cpu_candidates(struct sched_domain *sd, cpumask_t *cpus,
 			util = cpu_util_next(cpu, p, cpu);
 			cpu_cap = capacity_of(cpu);
 			spare_cap = cpu_cap - util;
+
+                        /* Skip CPUs which do not fit task requirements */
+			if (cpu_cap < uclamp_task_util(p))
+				continue;
 
 			/*
 			 * Skip CPUs that cannot satisfy the capacity request.
