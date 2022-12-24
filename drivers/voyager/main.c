@@ -8,8 +8,6 @@
 #include <linux/signal.h>
 #include <misc/voyager.h>
 
-#include <trace/hooks/misc.h>
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("The Voyager");
 MODULE_DESCRIPTION("kernel addon");

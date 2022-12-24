@@ -53,7 +53,6 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/signal.h>
-#include <trace/hooks/misc.h>
 
 #include <asm/param.h>
 #include <linux/uaccess.h>
