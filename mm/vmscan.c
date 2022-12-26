@@ -52,7 +52,6 @@
 #include <linux/dax.h>
 #include <linux/psi.h>
 #include <linux/memory.h>
-#include <linux/pagewalk.h>
 #include <linux/pagevec.h>
 #include <linux/shmem_fs.h>
 #include <linux/ctype.h>
@@ -3624,14 +3623,15 @@ done:
 
 static void walk_mm(struct lruvec *lruvec, struct mm_struct *mm, struct lru_gen_mm_walk *walk)
 {
-	static const struct mm_walk_ops mm_walk_ops = {
-		.test_walk = should_skip_vma,
-		.p4d_entry = walk_pud_range,
-	};
-
 	int err;
 	struct mem_cgroup *memcg = lruvec_memcg(lruvec);
 	struct pglist_data *pgdat = lruvec_pgdat(lruvec);
+	struct mm_walk args = {
+		.mm = mm,
+		.private = walk,
+		.test_walk = should_skip_vma,
+		.p4d_entry = walk_pud_range,
+	};
 
 	walk->next_addr = FIRST_USER_ADDRESS;
 
@@ -3644,7 +3644,7 @@ static void walk_mm(struct lruvec *lruvec, struct mm_struct *mm, struct lru_gen_
 
 		/* the caller might be holding the lock for write */
 		if (down_read_trylock(&mm->mmap_sem)) {
-			err = walk_page_range(mm, walk->next_addr, ULONG_MAX, &mm_walk_ops, walk);
+			err = walk_page_range(walk->next_addr, ULONG_MAX, &args);
 
 			up_read(&mm->mmap_sem);
 		}
