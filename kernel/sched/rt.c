@@ -1560,13 +1560,16 @@ task_may_not_preempt(struct task_struct *task, int cpu)
 		 task_thread_info(task)->preempt_count & SOFTIRQ_MASK));
 }
 
-static int rt_energy_aware_wake_cpu(struct task_struct *task);
+static int rt_energy_aware_wake_cpu(struct task_struct *task, int ret);
+
+static DEFINE_PER_CPU(cpumask_var_t, local_cpu_mask);
 
 static int
 select_task_rq_rt(struct task_struct *p, int cpu, int sd_flag, int flags,
 		  int sibling_count_hint)
 {
 	struct task_struct *curr;
+	struct cpumask *lowest_mask = this_cpu_cpumask_var_ptr(local_cpu_mask);
 	struct rq *rq;
 	int target = -1;
 	struct rq *this_cpu_rq;
@@ -1574,6 +1577,14 @@ select_task_rq_rt(struct task_struct *p, int cpu, int sd_flag, int flags,
 	bool may_not_preempt;
 	bool sync = !!(flags & WF_SYNC);
 	int this_cpu;
+	int ret;
+
+	/*
+	 * If we're on asym system ensure we consider the different capacities
+	 * of the CPUs when searching for the lowest_mask.
+	 */
+	ret = cpupri_find_fitness(&task_rq(p)->rd->cpupri, p,
+				lowest_mask, rt_task_fits_capacity);
 
 	/*
 	 * If cpu is non-preemptible, prefer remote cpu
@@ -1581,7 +1592,7 @@ select_task_rq_rt(struct task_struct *p, int cpu, int sd_flag, int flags,
 	 * Otherwise: Don't bother moving it if the destination CPU is
 	 * not running a lower priority task.
 	 */
-	target = rt_energy_aware_wake_cpu(p);
+	target = rt_energy_aware_wake_cpu(p, ret);
 	if (target != -1 &&
 	    (may_not_preempt || p->prio < cpu_rq(target)->rt.highest_prio.curr))
 		return target;
@@ -1643,7 +1654,7 @@ select_task_rq_rt(struct task_struct *p, int cpu, int sd_flag, int flags,
 		goto out_unlock;
 	}
 
-	if (static_branch_unlikely(&sched_energy_present) || test || !rt_task_fits_capacity(p, cpu)) {
+	if (test || !rt_task_fits_capacity(p, cpu)) {
 		int target = find_lowest_rq(p);
 
         	/*
@@ -1868,9 +1879,7 @@ static struct task_struct *pick_highest_pushable_task(struct rq *rq, int cpu)
 	return NULL;
 }
 
-static DEFINE_PER_CPU(cpumask_var_t, local_cpu_mask);
-
-static int rt_energy_aware_wake_cpu(struct task_struct *task)
+static int rt_energy_aware_wake_cpu(struct task_struct *task, int ret)
 {
 	struct sched_domain *sd;
 	struct sched_group *sg;
@@ -1885,6 +1894,9 @@ static int rt_energy_aware_wake_cpu(struct task_struct *task)
 	int cpu_idle_idx = -1;
 	bool boost_on_big = rt_boost_on_big();
 	bool best_cpu_lt = true;
+
+	if (!ret)
+		return -1; /* No targets found */
 
 	rcu_read_lock();
 
@@ -1921,10 +1933,31 @@ retry:
 			if (sched_cpu_high_irqload(cpu))
 				continue;
 
-			if (__cpu_overutilized(cpu, tutil))
+			util = cpu_util(cpu);
+
+			lt = (walt_low_latency_task(cpu_rq(cpu)->curr) ||
+				walt_nr_rtg_high_prio(cpu));
+
+			/*
+			 * When the best is suitable and the current is not,
+			 * skip it
+			 */
+			if (lt && !best_cpu_lt)
 				continue;
 
-			util = cpu_util(cpu);
+			/*
+			 * Either both are sutilable or unsuitable, load takes
+			 * precedence.
+			 */
+			if (!(best_cpu_lt ^ lt) && (util > best_cpu_util))
+				continue;
+
+			/* Find the least loaded CPU */
+			if (util > best_cpu_util)
+				continue;
+
+			if (__cpu_overutilized(cpu, tutil))
+				continue;
 
 			lt = (walt_low_latency_task(cpu_rq(cpu)->curr) ||
 				walt_nr_rtg_high_prio(cpu));
@@ -2000,6 +2033,7 @@ static int find_lowest_rq(struct task_struct *task)
 	struct cpumask *lowest_mask = this_cpu_cpumask_var_ptr(local_cpu_mask);
 	int this_cpu = smp_processor_id();
 	int cpu = -1;
+	int ret;
 
 	/* Make sure the mask is initialized first */
 	if (unlikely(!lowest_mask))
@@ -2011,8 +2045,21 @@ static int find_lowest_rq(struct task_struct *task)
 	if (!cpupri_find(&task_rq(task)->rd->cpupri, task, lowest_mask))
 		return -1; /* No targets found */
 
-	if (static_branch_unlikely(&sched_energy_present))
-		cpu = rt_energy_aware_wake_cpu(task);
+	if (static_branch_unlikely(&sched_energy_present)) {
+		/*
+	 	 * If we're on asym system ensure we consider the different capacities
+		 * of the CPUs when searching for the lowest_mask.
+		 */
+		ret = cpupri_find_fitness(&task_rq(task)->rd->cpupri, task,
+					lowest_mask, rt_task_fits_capacity);
+		cpu = rt_energy_aware_wake_cpu(task, ret);
+		
+		if (cpu >= 0)
+		        return cpu;
+
+        	if (!ret)
+	        	return -1; /* No targets found */
+        }
 
 	if (cpu == -1)
 		cpu = task_cpu(task);
