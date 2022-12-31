@@ -45,6 +45,10 @@ struct vm_area_struct;
 #define ___GFP_NOLOCKDEP	0
 #endif
 #define ___GFP_CMA		0x1000000u
+#ifdef CONFIG_HYBRIDSWAP_ZRAM
+#define ___GFP_HIGH_ATOMIC_ZRAM 0x2000000u
+#endif
+
 /* If the above are modified, __GFP_BITS_SHIFT may need updating */
 
 /*
