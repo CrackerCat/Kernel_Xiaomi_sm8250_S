@@ -54,6 +54,7 @@
 #include <linux/compaction.h>
 #include <trace/events/kmem.h>
 #include <trace/events/oom.h>
+#include <trace/hooks/vh_vmscan.h>
 #include <linux/prefetch.h>
 #include <linux/mm_inline.h>
 #include <linux/migrate.h>
@@ -3337,6 +3338,8 @@ struct page *rmqueue(struct zone *preferred_zone,
 
 	__count_zid_vm_events(PGALLOC, page_zonenum(page), 1 << order);
 	zone_statistics(preferred_zone, zone);
+	trace_android_vh_rmqueue(preferred_zone, zone, order,
+			gfp_flags, alloc_flags, migratetype);
 	local_irq_restore(flags);
 
 out:
@@ -4567,7 +4570,12 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
 	 * callers that are not in atomic context.
 	 */
 	if (WARN_ON_ONCE((gfp_mask & (__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)) ==
+#ifdef CONFIG_HYBRIDSWAP_ZRAM
+				(__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)) &&
+                !(gfp_mask & ___GFP_HIGH_ATOMIC_ZRAM))
+#else
 				(__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)))
+#endif
 		gfp_mask &= ~__GFP_ATOMIC;
 
 restart:
