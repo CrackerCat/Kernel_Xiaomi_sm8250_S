@@ -2258,7 +2258,7 @@ static void walt_cpus_capacity_changed(const cpumask_t *cpus)
 
 
 struct sched_cluster *sched_cluster[NR_CPUS];
-static int num_sched_clusters;
+int num_sched_clusters;
 
 struct list_head cluster_head;
 cpumask_t asym_cap_sibling_cpus = CPU_MASK_NONE;
@@ -2467,12 +2467,73 @@ static void update_all_clusters_stats(void)
 	release_rq_locks_irqrestore(cpu_possible_mask, &flags);
 }
 
+__read_mostly cpumask_t **cpu_array;
+
+static cpumask_t **init_cpu_array(void)
+{
+	int i;
+	cpumask_t **tmp_array;
+
+	tmp_array = kcalloc(num_sched_clusters, sizeof(cpumask_t *),
+			GFP_ATOMIC);
+	if (!tmp_array)
+		return NULL;
+	for (i = 0; i < num_sched_clusters; i++) {
+		tmp_array[i] = kcalloc(num_sched_clusters, sizeof(cpumask_t),
+			GFP_ATOMIC);
+		if (!tmp_array[i])
+			return NULL;
+	}
+
+	return tmp_array;
+}
+
+static cpumask_t **build_cpu_array(void)
+{
+	int i;
+	cpumask_t **tmp_array = init_cpu_array();
+
+	if (!tmp_array)
+		return NULL;
+
+	/*Construct cpu_array row by row*/
+	for (i = 0; i < num_sched_clusters; i++) {
+		int j, k = 1;
+
+		/* Fill out first column with appropriate cpu arrays*/
+		cpumask_copy(&tmp_array[i][0], &sched_cluster[i]->cpus);
+
+		/*
+		 * k starts from column 1 because 0 is filled
+		 * Fill clusters for the rest of the row,
+		 * above i in ascending order
+		 */
+		for (j = i + 1; j < num_sched_clusters; j++) {
+			cpumask_copy(&tmp_array[i][k],
+					&sched_cluster[j]->cpus);
+			k++;
+		}
+
+		/*
+		 * k starts from where we left off above.
+		 * Fill clusters below i in descending order.
+		 */
+		for (j = i - 1; j >= 0; j--) {
+			cpumask_copy(&tmp_array[i][k],
+					&sched_cluster[j]->cpus);
+			k++;
+		}
+	}
+	return tmp_array;
+}
+
 void update_cluster_topology(void)
 {
 	struct cpumask cpus = *cpu_possible_mask;
 	const struct cpumask *cluster_cpus;
 	struct sched_cluster *cluster;
 	struct list_head new_head;
+	cpumask_t **tmp;
 	int i;
 
 	INIT_LIST_HEAD(&new_head);
@@ -2505,6 +2566,13 @@ void update_cluster_topology(void)
 
 	if (cpumask_weight(&asym_cap_sibling_cpus) == 1)
 		cpumask_clear(&asym_cap_sibling_cpus);
+
+	tmp = build_cpu_array();
+	if (!tmp) {
+		BUG_ON(1);
+		return;
+	}
+	smp_store_release(&cpu_array, tmp);
 }
 
 static unsigned long cpu_max_table_freq[NR_CPUS];
@@ -3882,3 +3950,4 @@ unlock_mutex:
 	return ret;
 }
 #endif
+

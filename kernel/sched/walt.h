@@ -569,4 +569,16 @@ static inline unsigned int walt_nr_rtg_high_prio(int cpu)
 }
 #endif /* CONFIG_SCHED_WALT */
 
+/*
+ * The policy of a RT boosted task (via PI mutex) still indicates it is
+ * a fair task, so use prio check as well. The prio check alone is not
+ * sufficient since idle task also has 120 priority.
+ */
+static inline bool walt_fair_task(struct task_struct *p)
+{
+	return p->prio >= MAX_RT_PRIO && !is_idle_task(p);
+}
+
+extern int __read_mostly num_sched_clusters;
+extern cpumask_t __read_mostly **cpu_array;
 #endif
