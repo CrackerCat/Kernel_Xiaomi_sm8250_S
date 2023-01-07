@@ -10,7 +10,7 @@ gre='\e[0;32m'
 #
 
 # Set host name
-export KBUILD_BUILD_HOST="Voayger-sever"
+export KBUILD_BUILD_HOST="Voayger-server"
 export KBUILD_BUILD_USER="TheVoyager"
 
 # Set the current branch name
@@ -46,35 +46,6 @@ if [[ -z "${KEBABS}" ]]; then
 	export KEBABS="$((COUNT * 2))"
 fi
 
-function enable_flto() {
-	scripts/config --file ${OUT_DIR}/.config \
-		-e	LTO				\
-		-e	LTO_CLANG		\
-		-d	THIN_LTO
-
-    	# Make olddefconfig
-	cd ${OUT_DIR} || exit
-	make -j${KEBABS} ${ARGS} olddefconfig
-	cd ../ || exit
-}
-
-function enable_tlto() {
-	scripts/config --file ${OUT_DIR}/.config \
-		-e	LTO				\
-		-e	LTO_CLANG		\
-		-e	THIN_LTO
-
-    	# Make olddefconfig
-	cd ${OUT_DIR} || exit
-	make -j${KEBABS} ${ARGS} olddefconfig
-	cd ../ || exit
-}
-
-function disable_lto() {
-	scripts/config --file ${OUT_DIR}/.config \
-	-d LTO_CLANG
-}
-
 function checkbuild() {
 	if [[ ! -f ${OUT_DIR}/arch/arm64/boot/Image ]] && [[ ! -f ${OUT_DIR}/arch/arm64/boot/Image.gz ]]; then
 		echo "Error in ${os} build!!"
@@ -87,7 +58,7 @@ function out_product() {
 	find ${OUT_DIR}/$dts_source -name '*.dtb' -exec cat {} + >${OUT_DIR}/arch/arm64/boot/dtb
 
 if [ ! -d "anykernel" ]; then
-	git clone https://github.com/lateautumn233/AnyKernel3 -b kona --depth=1 anykernel
+	git clone https://github.com/TheVoyager0777/AnyKernel3.git -b kona --depth=1 anykernel
 fi
 
 	mkdir -p anykernel/kernels/$OS
@@ -112,7 +83,7 @@ function clean_up_outfolder() {
 	echo "------------ Clean up dts folder ------------"
 	git checkout arch/arm64/boot/dts/vendor &>/dev/null
 	echo "----------- Cleanup up old output -----------"
-	if [[ -f ${OUT_DIR}/arch/arm64/boot/Image ]] && [[ -f ${OUT_DIR}/arch/arm64/boot/Image.gz ]]; then
+	if [[ -d ${OUT_DIR}/arch/arm64/boot/ ]]; then
 		rm -r ${OUT_DIR}/arch/arm64/boot/
 	fi
 	echo "------- Cleanup up previous kernelzip -------"
@@ -128,7 +99,7 @@ function ak3_compress()
 	cd anykernel || exit
 
 	if [[ ! -d anykernel/out/ ]]; then
-			mkdir out
+		mkdir out
 	fi
 
 	zip -r9 "${ZIPNAME}" ./* -x .git .gitignore out/ ./*.zip
@@ -137,9 +108,13 @@ function ak3_compress()
 	fi
 	mv *.zip out/
 	cd ../
+	# Cleanup temp
+	rm -r anykernel/kernels/${OS}
 }
 
 function start_build() {
+	trap "echo aborting.." 2 || exit 1;
+
 	if [[ ! MULTI_BUILD -eq 1 ]]; then
 		clean_up_outfolder
 	fi
@@ -178,19 +153,7 @@ function start_build() {
 	make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" olddefconfig
 	cd ../ || exit
 
-	if [[ "$@" =~ "flto"* ]]; then
-		# Enable LTO
-		enable_flto
-		make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
-	fi
-
-	if [[ "$@" =~ "tlto"* ]]; then
-		# Enable LTO
-		enable_tlto
-		make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
-	else
-		make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
-	fi
+	make -j${KEBABS} ${ARGS} CC="ccache clang" HOSTCC="ccache gcc" HOSTCXX="ccache g++" 2>&1 | tee build.log
 
 	ZIPNAME="Voyager-${DEVICE^^}-build${BUILD}-${OS}-${CSUM}-${DATE}.zip"
 	export ZIPNAME	
@@ -226,42 +189,6 @@ function build_by_list() {
 
 START=$(date +"%s")
 
-if [[ ! "$2" =~ ""* ]] && [[ ! "$1" =~ "list"* ]] && [[ ! "$1" =~ "clean" ]] && [[ ! "$1" =~ "-h" ]]; then
-	DEVICE=$1
-	OS=$2
-	export MULTI_BUILD=0
-	start_build
-fi
-
-if [[ -a "$1" ]]; then
-	export LIST=$1
-	echo "---- Detect build list for bulk complie! ----"
-	export MULTI_BUILD=1
-	build_by_list
-fi
-
-END=$(date +"%s")
-DIFF=$((END - START))
-
-echo $(($BUILD + 1)) >${OUT_DIR}Version
-#
-# Finish complie 
-#
-
-
-#
-# Functions for help
-#
-
-# If you need clean up when complication is manually terminated..
-if [[ "$1" =~ "clean" ]]; then
-	clean_up_outfolder
-fi
-
-#
-# Functions for help
-#
-
 # Self-introduction function
 SELF_INTRO1="   This is a commonized script for kernel building. \
 		You can use it to complie single target device \
@@ -277,20 +204,36 @@ SELF_INTRO1="   This is a commonized script for kernel building. \
 		after making old defconfig to do some special changes. \
 		For more information, see the script usage."
 
-SELF_INTRO2=$(echo "Usage1: bash build-kernel.sh [device_code] [system_type]")
-SELF_INTRO3=$(echo "Usage2: bash build-kernel.sh list")
-SELF_INTRO4=$(echo "Usage3: bash build-kernel.sh -g [device_codes (separated with space)]")
-SELF_INTRO5=$(echo "Usage4: bash build-kernel.sh clean")
-SELF_INTRO7=$(echo "-g [device_codes]:           generate a list of device_code for continuous complie")
-SELF_INTRO7=$(echo "-clean:                      clean up work folders include dts, complie output and kernelzip")
+SELF_INTRO2="	Usage: bash build-kernel.sh [device_code] [system_type] \
+		       bash build-kernel.sh [listfile] \
+		       bash build-kernel.sh clean clean up work folders include dts, complie output and kernelzip"		
 
-if [[ "$1" =~ "-h" ]]; then
-		echo $SELF_INTRO1;
-		echo "          ";
-		echo $SELF_INTRO2;
-		echo $SELF_INTRO3;
-		echo $SELF_INTRO4;
-		echo "          ";
-		echo $SELF_INTRO5;
-		echo $SELF_INTRO7;
+if [[ "$1" =~ help ]]; then
+	echo $SELF_INTRO1
+	echo $SELF_INTRO2
+elif [[ -f "$1" ]]; then
+	export LIST=$1
+	echo "---- Detect build list for bulk complie! ----"
+	export MULTI_BUILD=1
+	build_by_list
+elif [[ ! "$2" =~ ""* ]] && [[ ! "$1" =~ "clean" ]]; then
+	trap "echo Abort.." 2
+	DEVICE=$1
+	OS=$2
+	export MULTI_BUILD=0
+	start_build
 fi
+
+END=$(date +"%s")
+DIFF=$((END - START))
+
+echo $(($BUILD + 1)) >${OUT_DIR}Version
+#
+# Finish complie 
+#
+
+# If you need clean up when complication is manually terminated..
+if [[ "$1" =~ "clean" ]]; then
+	clean_up_outfolder
+fi
+
