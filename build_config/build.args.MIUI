@@ -5,13 +5,15 @@
 # Set clang path
 CLANG_PATH=/home/voyager/gclang/clang-r458507
 
-ARGS="ARCH=arm64 \
+ARGS=(
+ARCH=arm64 \
 O=${OUT_DIR} \
 LLVM=1 \
 CLANG_TRIPLE=aarch64-linux-gnu- \
 CROSS_COMPILE=aarch64-linux-gnu- \
 CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
--j${KEBABS}"
+-j${KEBABS}
+)
 
 #
 # If you need overwrite some config but don't want to change defconfig, then use the function below to 

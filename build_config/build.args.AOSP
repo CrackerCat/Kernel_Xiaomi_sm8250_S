@@ -2,14 +2,18 @@
 # This is the cross complie invocation, these variables will be export in build-kernel.sh
 #
 
-ARCH=arm64
-LLVM=1
-CLANG_TRIPLE=aarch64-linux-gnu-
-CROSS_COMPILE=aarch64-linux-gnu-
-CROSS_COMPILE_COMPAT=arm-linux-gnueabi-
-CC="ccache clang"
-HOSTCC="ccache gcc"
-HOSTCXX="ccache g++"
+# Set clang path
+CLANG_PATH=/home/voyager/gclang/clang-r458507
+
+ARGS=(
+ARCH=arm64 \
+O=${OUT_DIR} \
+LLVM=1 \
+CLANG_TRIPLE=aarch64-linux-gnu- \
+CROSS_COMPILE=aarch64-linux-gnu- \
+CROSS_COMPILE_COMPAT=arm-linux-gnueabi- \
+-j${KEBABS}
+)
 
 #
 # If you need overwrite some config but don't want to change defconfig, then use the function below to 
