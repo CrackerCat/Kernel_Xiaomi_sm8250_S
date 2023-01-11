@@ -155,6 +155,8 @@ function start_build() {
 
 	ak3_compress
 
+	echo $(($BUILD + 1)) >${OUT_DIR}Version
+
 	echo "------ Finishing ${OS^} Build, Device ${DEVICE^^} ------"
 }
 
