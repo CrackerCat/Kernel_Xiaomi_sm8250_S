@@ -583,3 +583,12 @@ static inline bool walt_fair_task(struct task_struct *p)
 extern int __read_mostly num_sched_clusters;
 extern cpumask_t __read_mostly **cpu_array;
 #endif
+static inline unsigned int walt_get_idle_exit_latency(struct rq *rq)
+{
+	struct cpuidle_state *idle = idle_get_state(rq);
+
+	if (idle)
+		return idle->exit_latency;
+
+	return 0; /* CPU is not idle */
+}
